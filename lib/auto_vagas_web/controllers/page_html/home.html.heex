@@ -1,0 +1,75 @@
+ <Layouts.app flash={@flash}>
+      <div class="hero min-h-[80vh] bg-base-200">
+        <div class="hero-content text-center">
+          <div class="max-w-2xl">
+            <h1 class="text-5xl font-bold text-base-content">
+              Encontre vagas de emprego automaticamente
+            </h1>
+            <p class="py-6 text-lg text-base-content/70">
+              Automatize sua busca de vagas em múltiplas plataformas como LinkedIn, Indeed e Gupy.
+              Configure seus perfis e interesses para receber oportunidades personalizadas.
+            </p>
+            <div class="flex gap-4 justify-center">
+              <.link navigate="/buscar" class="btn btn-primary btn-lg">
+                Buscar Vagas
+              </.link>
+              <.link navigate="/configuracoes" class="btn btn-outline btn-lg">
+                Configurar Perfil
+              </.link>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="max-w-4xl mx-auto p-6">
+        <section class="py-12">
+          <h2 class="text-2xl font-bold text-base-content text-center mb-8">
+            Como funciona
+          </h2>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="card bg-base-200 shadow">
+              <div class="card-body items-center text-center">
+                <.icon name="hero-user" class="w-12 h-12 text-primary" />
+                <h3 class="card-title">Crie seu perfil</h3>
+                <p class="text-base-content/60">
+                  Configure seus interesses, tecnologias e áreas de atuação.
+                </p>
+              </div>
+            </div>
+
+            <div class="card bg-base-200 shadow">
+              <div class="card-body items-center text-center">
+                <.icon name="hero-magnifying-glass" class="w-12 h-12 text-primary" />
+                <h3 class="card-title">Busca automática</h3>
+                <p class="text-base-content/60">
+                  O sistema busca em múltiplas plataformas simultaneamente.
+                </p>
+              </div>
+            </div>
+
+            <div class="card bg-base-200 shadow">
+              <div class="card-body items-center text-center">
+                <.icon name="hero-bell" class="w-12 h-12 text-primary" />
+                <h3 class="card-title">Receba oportunidades</h3>
+                <p class="text-base-content/60">
+                  Encontre vagas que combinam com seu perfil e experiência.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="py-12 text-center">
+          <h2 class="text-2xl font-bold text-base-content mb-4">
+            Plataformas suportadas
+          </h2>
+          <div class="flex gap-6 justify-center">
+            <a href="https://www.linkedin.com" class="badge badge-lg badge-primary">LinkedIn</a>
+            <a href="https://br.indeed.com" class="badge badge-lg badge-primary">Indeed</a>
+            <a href="https://login.gupy.io/candidates/curriculum" class="badge badge-lg badge-primary">Gupy</a>
+            <a href="https://www.infojobs.com.br/candidate/" class="badge badge-lg badge-secondary">InfoJobs</a>
+          </div>
+        </section>
+      </div>
+    </Layouts.app>
