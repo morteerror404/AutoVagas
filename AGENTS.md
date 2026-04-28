@@ -206,7 +206,7 @@ O AutoVagas é uma aplicação web construída com Phoenix Framework (Elixir) pa
 - [x] Rotas LiveView adicionadas (/buscar, /vagas, /configuracoes)
 - [x] Mnesia Schema corrigido para single-node development
 - [x] AuthSession refatorado para GenServer (sem dependência de Agent)
-- [x] UI de SSO na página de configuração com indicadores visuais (✓/💡/❌)
+- [x] UI de SSO na página de configuração com indicadores visuais 
 - [ ] Processamento de mensagens para preenchimento automático
 - [ ] Migração completa de JobsCache para Mnesia
 
@@ -220,7 +220,7 @@ O AutoVagas é uma aplicação web construída com Phoenix Framework (Elixir) pa
 ## Testes da API LinkedIn
 
 ### Credenciais Configuradas
-- Client ID: `77ye1svdvforpt`
+- Client ID: `3x3mpl3`
 - Client Secret: `[REMOVIDO - criptografado em auth_config.json]`
 - Redirect URI: `http://localhost:4000/auth/linkedin/callback`
 
@@ -229,7 +229,7 @@ O AutoVagas é uma aplicação web construída com Phoenix Framework (Elixir) pa
 - URL gerada corretamente com parametros:
   - `scope=r_liteprofile+r_emailaddress`
   - `response_type=code`
-  - `client_id=77ye1svdvforpt`
+  - `client_id=3x3mpl3`
   - `redirect_uri=http://localhost:4000/auth/linkedin/callback`
 
 ### Teste 2: Troca de Codigo por Access Token
