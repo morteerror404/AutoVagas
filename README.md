@@ -161,5 +161,5 @@ Consulte o arquivo `AGENTS.md` para detalhes completos sobre a arquitetura do pr
 
 ## Licença
 
-[Apache V2.0](LICENSA)
+[Apache V2.0](LICENSE.md)
 
