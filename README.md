@@ -161,4 +161,5 @@ Consulte o arquivo `AGENTS.md` para detalhes completos sobre a arquitetura do pr
 
 ## Licença
 
-MIT
+Apache V2.0 
+
