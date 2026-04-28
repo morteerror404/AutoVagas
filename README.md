@@ -54,6 +54,8 @@ Sistema de busca automatizada de vagas de emprego construído com Phoenix Framew
 - [ ] Implementação completa do fluxo Gupy SAML 2.0 (requer biblioteca `samly`)
 - [ ] Configuração de canais de notificação (WhatsApp Business API, Telegram Bot, Discord Webhook)
 - [ ] Deploy em produção (HTTPS obrigatório para LinkedIn OAuth)
+- [ ] Crawler de vagas direto no google
+- [ ] Crawler de grupos de vagas (Telegram, WhatsApp e Discord).
 
 ## Como Executar
 
@@ -162,4 +164,3 @@ Consulte o arquivo `AGENTS.md` para detalhes completos sobre a arquitetura do pr
 ## Licença
 
 [Apache V2.0](LICENSE.md)
-
