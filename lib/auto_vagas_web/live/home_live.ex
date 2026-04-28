@@ -1,7 +1,7 @@
 defmodule AutoVagasWeb.HomeLive do
   use AutoVagasWeb, :live_view
 
-  def render(assigns) do
+  def render(_assigns) do
   end
 
   @spec mount(any(), any(), any()) :: {:ok, any()}

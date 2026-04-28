@@ -59,9 +59,4 @@ defmodule AutoVagasWeb.AuthController do
         |> redirect(to: "/configuracoes")
     end
   end
-
-  defp construct_redirect_uri(conn) do
-    scheme = if conn.scheme == :https, do: "https", else: "http"
-    "#{scheme}://#{conn.host}:#{conn.port}/auth/linkedin/callback"
-  end
 end

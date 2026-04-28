@@ -46,20 +46,4 @@ defmodule AutoVagas.Auth.Gupy do
         {:error, reason}
     end
   end
-
-  defp save_token(token) do
-    config_path = "priv/filters/auth_config.json"
-    config = load_auth_config()
-    updated = put_in(config, ["gupy", "access_token"], token)
-    File.write!(config_path, Jason.encode!(updated, pretty: true))
-  end
-
-  defp load_auth_config do
-    path = "priv/filters/auth_config.json"
-    if File.exists?(path) do
-      path |> File.read!() |> Jason.decode!()
-    else
-      %{}
-    end
-  end
 end
