@@ -14,7 +14,7 @@ defmodule AutoVagasWeb.AuthController do
 
       {:error, reason} ->
         conn
-        |> put_flash(:error, "Erro ao conectar com LinkedIn: #{reason}")
+        |> put_flash(:error, "Erro ao conectar com LinkedIn: #{inspect(reason)}")
         |> redirect(to: "/configuracoes")
     end
   end
@@ -37,7 +37,7 @@ defmodule AutoVagasWeb.AuthController do
 
       {:error, reason} ->
         conn
-        |> put_flash(:error, "Erro ao conectar com Indeed: #{reason}")
+        |> put_flash(:error, "Erro ao conectar com Indeed: #{inspect(reason)}")
         |> redirect(to: "/configuracoes")
     end
   end

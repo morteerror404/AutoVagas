@@ -37,3 +37,4 @@ npm-debug.log
 
 /priv/filters
 /priv/user_info.json
+/priv/captured_jobs.json

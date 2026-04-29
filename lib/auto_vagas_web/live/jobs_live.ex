@@ -1,7 +1,7 @@
 defmodule AutoVagasWeb.JobsLive do
   use AutoVagasWeb, :live_view
 
-  alias AutoVagas.Crawler.{Filter, JobsStore}
+  alias AutoVagas.Crawler.Filter
 
   def render(assigns) do
     ~H"""
@@ -120,8 +120,12 @@ defmodule AutoVagasWeb.JobsLive do
 
   def mount(_params, _session, socket) do
     jobs =
-      JobsStore.load()
-      |> Enum.map(&Map.put(&1, "selected", false))
+      AutoVagas.Crawler.JobsStore.load()
+      |> Enum.map(fn job ->
+        job
+        |> Map.new(fn {k, v} -> {String.to_atom(k), v} end)
+        |> Map.put(:selected, false)
+      end)
 
     search_form = to_form(%{"q" => ""})
 
@@ -149,9 +153,9 @@ defmodule AutoVagasWeb.JobsLive do
         jobs
       else
         Enum.filter(jobs, fn job ->
-          title = String.downcase(Map.get(job, "title", ""))
-          company = String.downcase(Map.get(job, "company", ""))
-          location = String.downcase(Map.get(job, "location", ""))
+          title = String.downcase(Map.get(job, :title, ""))
+          company = String.downcase(Map.get(job, :company, ""))
+          location = String.downcase(Map.get(job, :location, ""))
 
           String.contains?(title, query) or String.contains?(company, query) or
             String.contains?(location, query)
@@ -171,8 +175,8 @@ defmodule AutoVagasWeb.JobsLive do
 
     jobs =
       Enum.map(socket.assigns.jobs, fn job ->
-        if job["external_id"] == id do
-          Map.put(job, "selected", id in selected)
+        if job[:external_id] == id do
+          Map.put(job, :selected, id in selected)
         else
           job
         end
@@ -183,22 +187,22 @@ defmodule AutoVagasWeb.JobsLive do
 
   def handle_event("select_all", _, socket) do
     ids = MapSet.new(Enum.map(socket.assigns.jobs, & &1["external_id"]))
-    jobs = Enum.map(socket.assigns.jobs, fn job -> Map.put(job, "selected", true) end)
+    jobs = Enum.map(socket.assigns.jobs, fn job -> Map.put(job, :selected, true) end)
     {:noreply, socket |> assign(jobs: jobs, selected_ids: ids)}
   end
 
   def handle_event("deselect_all", _, socket) do
-    jobs = Enum.map(socket.assigns.jobs, fn job -> Map.put(job, "selected", false) end)
+    jobs = Enum.map(socket.assigns.jobs, fn job -> Map.put(job, :selected, false) end)
     {:noreply, socket |> assign(jobs: jobs, selected_ids: MapSet.new())}
   end
 
   def handle_event("delete_selected", _, socket) do
     ids = socket.assigns.selected_ids
-    remaining = Enum.reject(socket.assigns.jobs, fn job -> job["external_id"] in ids end)
+    remaining = Enum.reject(socket.assigns.jobs, fn job -> job[:external_id] in ids end)
 
-    JobsStore.save(remaining)
+    AutoVagas.Crawler.JobsStore.save(remaining)
 
-    remaining_with_selection = Enum.map(remaining, &Map.put(&1, "selected", false))
+    remaining_with_selection = Enum.map(remaining, &Map.put(&1, :selected, false))
 
     {:noreply,
      socket
@@ -210,7 +214,7 @@ defmodule AutoVagasWeb.JobsLive do
   end
 
   def handle_event("clear_all", _, socket) do
-    JobsStore.clear()
+    AutoVagas.Crawler.JobsStore.clear()
     {:noreply, socket |> assign(jobs: [], displayed_jobs: [], selected_ids: MapSet.new())}
   end
 

@@ -31,10 +31,18 @@ defmodule AutoVagas.Application do
   defp start_mnesia do
     require Logger
     try do
-      AutoVagas.Mnesia.Schema.init()
+      case AutoVagas.Mnesia.Schema.init() do
+        :ok ->
+          Logger.info("Mnesia schema ready")
+
+        other ->
+          Logger.warning("Mnesia init returned: #{inspect(other)}")
+      end
+
       case AutoVagas.Mnesia.Schema.wait_for_tables() do
-        :ok -> 
+        :ok ->
           Logger.info("Mnesia tables ready")
+
         other ->
           Logger.warning("Mnesia wait_for_tables returned: #{inspect(other)}")
       end
@@ -42,6 +50,7 @@ defmodule AutoVagas.Application do
       e ->
         Logger.error("Erro ao iniciar Mnesia: #{inspect(e)}")
     end
+    :ok
   end
 
   # Tell Phoenix to update the endpoint configuration

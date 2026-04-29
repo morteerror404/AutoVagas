@@ -30,6 +30,7 @@ defmodule AutoVagasWeb.Router do
     live "/vagas", JobsLive, :index
     live "/configuracoes", SettingsLive, :index
     live "/ajuda", HelpLive, :index
+    live "/habilidades", SkillsLive, :index
   end
 
   # Other scopes may use custom stacks.

@@ -91,7 +91,18 @@ defmodule AutoVagas.Auth.Indeed do
 
   defp get_client_secret do
     config = load_auth_config()
-    get_in(config, ["indeed", "client_secret"]) || System.get_env("INDEED_CLIENT_SECRET")
+    encrypted_secret = get_in(config, ["indeed", "client_secret"]) || System.get_env("INDEED_CLIENT_SECRET")
+
+    if encrypted_secret && String.length(encrypted_secret) > 40 do
+      # Assume it's encrypted (Base64 encoded ciphertext is longer)
+      try do
+        AutoVagas.Crypto.decrypt(encrypted_secret)
+      rescue
+        _ -> encrypted_secret
+      end
+    else
+      encrypted_secret
+    end
   end
 
   defp get_redirect_uri do

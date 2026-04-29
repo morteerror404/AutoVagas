@@ -33,6 +33,7 @@ defmodule AutoVagas.Crawler.Sites.LinkedIn do
         work_type \\ nil,
         user_config \\ %{}
       ) do
+    search_term = to_string(search_term)
     user_loc = location || UserConfig.default_location()
     user_time = time_posted || get_in(UserConfig.default_filters(), ["time_posted"]) || "r86400"
 

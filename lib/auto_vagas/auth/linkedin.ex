@@ -56,8 +56,8 @@ defmodule AutoVagas.Auth.LinkedIn do
         {:ok, access_token}
 
       {:ok, %Req.Response{status: status, body: body}} ->
-        Logger.error("LinkedIn token exchange failed: #{status} - #{body}")
-        {:error, "Token exchange failed: #{body}"}
+        Logger.error("LinkedIn token exchange failed: #{status} - #{inspect(body)}")
+        {:error, "Token exchange failed: #{inspect(body)}"}
 
       {:error, reason} ->
         Logger.error("LinkedIn token exchange error: #{inspect(reason)}")
@@ -114,7 +114,18 @@ defmodule AutoVagas.Auth.LinkedIn do
 
   defp get_client_secret do
     config = load_auth_config()
-    get_in(config, ["linkedin", "client_secret"]) || System.get_env("LINKEDIN_CLIENT_SECRET")
+    encrypted_secret = get_in(config, ["linkedin", "client_secret"]) || System.get_env("LINKEDIN_CLIENT_SECRET")
+
+    if encrypted_secret && String.length(encrypted_secret) > 40 do
+      # Assume it's encrypted (Base64 encoded ciphertext is longer)
+      try do
+        AutoVagas.Crypto.decrypt(encrypted_secret)
+      rescue
+        _ -> encrypted_secret
+      end
+    else
+      encrypted_secret
+    end
   end
 
   defp get_redirect_uri do

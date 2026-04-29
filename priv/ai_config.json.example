@@ -1,0 +1,18 @@
+{
+  "provider": "ollama",
+  "ollama": {
+    "enabled": true,
+    "endpoint": "http://localhost:11434",
+    "model": "llama3.2"
+  },
+  "gemini": {
+    "enabled": false,
+    "api_key": "YOUR_GEMINI_API_KEY_HERE",
+    "model": "gemini-2.0-flash"
+  },
+  "openai": {
+    "enabled": false,
+    "api_key": "YOUR_OPENAI_API_KEY_HERE",
+    "model": "gpt-4o-mini"
+  }
+}
