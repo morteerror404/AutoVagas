@@ -64,18 +64,24 @@ else
     print_info "Node.js encontrado: $(node --version)"
 fi
 
-# 5. Instala Firefox Developer Edition
+# 5. Instala Firefox Developer Edition (apenas esta versão é suportada)
 print_info "Verificando Firefox Developer Edition..."
 if ! command -v firefox-developer-edition &> /dev/null; then
-    print_warn "Firefox Developer Edition não encontrado. Instalando via Snap..."
+    print_warn "Firefox Developer Edition não encontrado. Instalando..."
+    
+    # Tenta Snap primeiro
     if command -v snap &> /dev/null; then
+        print_info "Instalando Firefox Developer Edition via Snap..."
         $SUDO snap install firefox --beta
-        # Cria link simbólico
         $SUDO ln -sf /snap/bin/firefox /usr/local/bin/firefox-developer-edition 2>/dev/null || true
-    else
-        print_warn "Snap não disponível. Instalando Firefox normal..."
+    # Tenta apt
+    elif command -v apt &> /dev/null; then
+        print_info "Instalando Firefox via apt..."
         $SUDO apt install -y -qq firefox
         $SUDO ln -sf /usr/bin/firefox /usr/local/bin/firefox-developer-edition 2>/dev/null || true
+    else
+        print_error "Não foi possível instalar Firefox Developer Edition"
+        print_info "Instale manualmente em: /usr/bin/firefox-developer-edition"
     fi
 else
     print_info "Firefox Developer Edition encontrado: $(firefox-developer-edition --version 2>/dev/null | head -1)"
@@ -175,8 +181,15 @@ echo "=========================================="
 echo "Instalação concluída!"
 echo "=========================================="
 echo ""
-echo "Para iniciar o servidor, execute:"
-echo "  mix phx.server"
+echo "Iniciando servidor Phoenix na porta 4000..."
+mix phx.server > /tmp/phx.log 2>&1 &
+sleep 3
+
+echo "Abrindo página de configuração SSO no Firefox Developer Edition..."
+firefox-developer-edition http://localhost:4000/configuracoes &
 echo ""
-echo "Acesse: http://localhost:4000"
+echo "Servidor rodando em: http://localhost:4000"
+echo "Página de configuração SSO aberta em: http://localhost:4000/configuracoes"
+echo ""
+echo "Para parar o servidor: Ctrl+C ou killall mix"
 echo ""

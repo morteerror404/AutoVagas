@@ -51,7 +51,7 @@ if %errorLevel% NEQ 0 (
     node --version
 )
 
-REM 4. Instala Firefox Developer Edition
+REM 4. Instala Firefox Developer Edition (apenas esta versão é suportada)
 echo [INFO] Verificando Firefox Developer Edition...
 set "FIREFOX_PATH="
 for %%i in (
@@ -69,8 +69,10 @@ for %%i in (
 if defined FIREFOX_PATH (
     echo [INFO] Firefox Developer Edition encontrado: %FIREFOX_PATH%
 ) else (
-    echo [INFO] Firefox Developer Edition não encontrado. Instalando...
+    echo [INFO] Firefox Developer Edition não encontrado. Instalando via Chocolatey...
     choco install firefox-dev -y
+    REM Define caminho padrão após instalação
+    set "FIREFOX_PATH=C:\Program Files\Firefox Developer Edition\firefox.exe"
 )
 
 REM 5. Instala GeckoDriver
@@ -162,10 +164,17 @@ echo ==========================================
 echo Instalação concluída!
 echo ==========================================
 echo.
-echo Para iniciar o servidor, execute:
-echo   mix phx.server
+echo Iniciando servidor Phoenix na porta 4000...
+start "" mix phx.server
+timeout /t 3 /nobreak >nul
+
+echo Abrindo página de configuração SSO no Firefox Developer Edition...
+start "" "%FIREFOX_PATH%" http://localhost:4000/configuracoes
+
 echo.
-echo Acesse: http://localhost:4000
+echo Servidor rodando em: http://localhost:4000
+echo Página de configuração SSO aberta em: http://localhost:4000/configuracoes
+echo Para parar o servidor: Ctrl+C
 echo.
 
 pause

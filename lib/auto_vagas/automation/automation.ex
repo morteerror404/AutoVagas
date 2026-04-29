@@ -9,37 +9,19 @@ defmodule AutoVagas.Automation do
   @doc """
   Inicia sessão para automação usando Wallaby.
   """
-  def start_session(browser \\ :chrome) do
-    case browser do
-      :chrome ->
-        case System.find_executable("google-chrome") || System.find_executable("chromium") do
-          nil ->
-            Logger.error("Chrome/Chromium não encontrado. Usando modo simulação.")
-            {:ok, %{browser: :simulation}}
-          path ->
-            Logger.info("Browser encontrado: #{path}")
-            {:ok, %{browser: :chrome, path: path}}
-        end
-
-      :firefox ->
-        # Tenta Firefox Developer Edition primeiro, depois Firefox normal
-        firefox_dev = System.find_executable("firefox-developer-edition")
-        firefox_normal = System.find_executable("firefox")
-        
-        cond do
-          firefox_dev ->
-            Logger.info("Firefox Developer Edition encontrado: #{firefox_dev}")
-            {:ok, %{browser: :firefox, path: firefox_dev}}
-          firefox_normal ->
-            Logger.info("Firefox encontrado: #{firefox_normal}")
-            {:ok, %{browser: :firefox, path: firefox_normal}}
-          true ->
-            Logger.error("Firefox não encontrado. Usando modo simulação.")
-            {:ok, %{browser: :simulation}}
-        end
-
-      _ ->
-        {:error, :unsupported_browser}
+  def start_session(_browser \\ :firefox) do
+    # Apenas Firefox Developer Edition é suportado para automação
+    firefox_dev = System.find_executable("firefox-developer-edition")
+    
+    case firefox_dev do
+      nil ->
+        Logger.error("Firefox Developer Edition não encontrado em: /usr/bin/firefox-developer-edition")
+        Logger.info("Instale com: snap install firefox --beta (ou via apt)")
+        {:error, :firefox_dev_not_found}
+      
+      path ->
+        Logger.info("Firefox Developer Edition encontrado: #{path}")
+        {:ok, %{browser: :firefox, path: path}}
     end
   end
 

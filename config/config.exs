@@ -41,7 +41,7 @@ config :esbuild,
     env: %{"NODE_PATH" => [Path.expand("../deps", __DIR__), Mix.Project.build_path()]}
   ]
 
-# Configure Wallaby to use Firefox Developer Edition via Selenium
+# Configure Wallaby to use ONLY Firefox Developer Edition via Selenium
 config :wallaby, driver: Wallaby.Selenium,
   selenium: [
     capabilities: %{

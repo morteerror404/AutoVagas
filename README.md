@@ -14,7 +14,7 @@ Sistema de busca e inscrição automatizada de vagas de emprego construído com 
 - **Notificações** via WhatsApp, Telegram e Discord (apenas um canal ativo - radio button)
 - **Integração SSO**: LinkedIn (OAuth 2.0), Indeed, Gupy (SAML 2.0)
 - **Criptografia AES-256** para credenciais sensíveis
-- **Inscrição automática** via Firefox Developer Edition (crawling via API do LinkedIn)
+- **Inscrição automática** via Firefox Developer Edition (apenas esta versão suportada)
 
 ## Rotas Principais
 
@@ -129,9 +129,11 @@ AGENTS.md               # Documentação completa para agentes de IA
 
 ### Sistema Operacional
 - Linux (testado no Ubuntu/Debian)
-- Firefox Developer Edition (/usr/bin/firefox-developer-edition)
+- **Apenas Firefox Developer Edition** (/usr/bin/firefox-developer-edition)
 - GeckoDriver 0.36.0 (/usr/bin/geckodriver)
 - inotify-tools (opcional, para live-reload)
+
+**Nota:** Apenas o Firefox Developer Edition é suportado para automação. Firefox normal ou Chrome não funcionarão.
 
 ### Dependências Elixir/Erlang
 - Elixir ~> 1.15
@@ -164,10 +166,12 @@ AGENTS.md               # Documentação completa para agentes de IA
    ```
 
 ### Para Automação de Inscrições
-- Firefox Developer Edition instalado
-- GeckoDriver instalado
-- Wallaby + Selenium configurados
+- **Apenas Firefox Developer Edition** instalado em `/usr/bin/firefox-developer-edition`
+- GeckoDriver instalado em `/usr/bin/geckodriver`
+- Wallaby + Selenium configurados para Firefox Developer Edition
 - Acesso à internet para vagas do LinkedIn
+
+**Nota:** O sistema abrirá automaticamente a página de configuração SSO no Firefox Developer Edition após a instalação.
 
 ## Dependências Principais
 
