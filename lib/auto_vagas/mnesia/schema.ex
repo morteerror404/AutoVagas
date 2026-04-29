@@ -22,13 +22,14 @@ defmodule AutoVagas.Mnesia.Schema do
         Logger.debug("Mnesia schema already exists")
 
       {:error, reason} ->
-        Logger.error("Mnesia schema creation failed: #{inspect(reason)}")
+        Logger.warning("Mnesia schema creation failed: #{inspect(reason)} - continuing anyway")
     end
 
     create_tables()
+    :ok
   end
 
-  defp create_tables do
+  def create_tables do
     create_search_table()
     create_jobs_table()
     create_notifications_table()

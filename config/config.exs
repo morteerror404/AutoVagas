@@ -31,16 +31,6 @@ config :auto_vagas, AutoVagasWeb.Endpoint,
 # at the `config/runtime.exs`.
 config :auto_vagas, AutoVagas.Mailer, adapter: Swoosh.Adapters.Local
 
-# Configure esbuild (the version is required)
-config :esbuild,
-  version: "0.25.4",
-  auto_vagas: [
-    args:
-      ~w(js/app.js --bundle --target=es2022 --outdir=../priv/static/assets/js --external:/fonts/* --external:/images/* --alias:@=.),
-    cd: Path.expand("../assets", __DIR__),
-    env: %{"NODE_PATH" => [Path.expand("../deps", __DIR__), Mix.Project.build_path()]}
-  ]
-
 # Configure Wallaby to use ONLY Firefox Developer Edition via Selenium
 config :wallaby, driver: Wallaby.Selenium,
   selenium: [
@@ -51,6 +41,16 @@ config :wallaby, driver: Wallaby.Selenium,
         args: ["-headless"]
       }
     }
+  ]
+
+# Configure esbuild (the version is required)
+config :esbuild,
+  version: "0.25.4",
+  auto_vagas: [
+    args:
+      ~w(js/app.js --bundle --target=es2022 --outdir=../priv/static/assets/js --external:/fonts/* --external:/images/* --alias:@=.),
+    cd: Path.expand("../assets", __DIR__),
+    env: %{"NODE_PATH" => [Path.expand("../deps", __DIR__), Mix.Project.build_path()]}
   ]
 
 # Configure tailwind (the version is required)
@@ -72,6 +72,27 @@ config :logger, :default_formatter,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
-# Import environment specific config. This must remain at the bottom
-# of this file so it overrides the configuration defined above.
-import_config "#{config_env()}.exs"
+# For development, we disable some of the checks
+if config_env() == :dev do
+  config :auto_vagas, AutoVagasWeb.Endpoint,
+    debug_errors: [show_details: true],
+    check_origin: false
+
+  # Enable the Swoosh mail preview in development
+  config :swoosh, :preview_enabled, true
+end
+
+if config_env() == :test do
+  config :auto_vagas, AutoVagasWeb.Endpoint,
+    # Disable server in tests
+    server: false
+
+  config :auto_vagas, AutoVagasWeb.LiveViewTest,
+    default_endpoint: AutoVagasWeb.Endpoint
+
+  config :esbuild, if: false
+  config :tailwind, if: false
+
+  # Disable logger in tests
+  config :logger, level: :warning
+end

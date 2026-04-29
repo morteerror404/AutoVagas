@@ -2,7 +2,6 @@
 #
 # AutoVagas - Script de Instalação para Linux
 # Este script instala todas as dependências necessárias para o funcionamento do AutoVagas
-# Apenas Firefox Developer Edition é suportado para automação
 #
 
 set -e
@@ -32,7 +31,7 @@ print_error() {
 }
 
 # Verifica se está rodando como root (para apt)
-if [ "$EUID" -eq 0 ]; then
+if [ "$EUID" -eq 0 ]; then 
     SUDO=""
 else
     SUDO="sudo"
@@ -65,7 +64,7 @@ else
     print_info "Node.js encontrado: $(node --version)"
 fi
 
-# 5. Instala APENAS Firefox Developer Edition
+# 5. Instala Firefox Developer Edition (apenas esta versão é suportada)
 print_info "Verificando Firefox Developer Edition..."
 if ! command -v firefox-developer-edition &> /dev/null; then
     print_warn "Firefox Developer Edition não encontrado. Instalando..."
@@ -103,7 +102,16 @@ else
     print_info "GeckoDriver encontrado: $(geckodriver --version)"
 fi
 
-# 7. Instala inotify-tools (opcional, para live-reload)
+# 7. Instala ChromeDriver (opcional, para Chrome)
+print_info "Verificando ChromeDriver..."
+if ! command -v chromedriver &> /dev/null; then
+    print_warn "ChromeDriver não encontrado. Instalando..."
+    $SUDO apt install -y -qq chromium-chromedriver 2>/dev/null || print_warn "Chromium ChromeDriver não disponível via apt"
+else
+    print_info "ChromeDriver encontrado: $(chromedriver --version 2>/dev/null || echo 'versão desconhecida')"
+fi
+
+# 8. Instala inotify-tools (opcional, para live-reload)
 print_info "Verificando inotify-tools..."
 if ! command -v inotifywait &> /dev/null; then
     print_warn "inotify-tools não encontrado. Instalando..."
@@ -112,7 +120,7 @@ else
     print_info "inotify-tools encontrado"
 fi
 
-# 8. Configura o projeto Elixir
+# 9. Configura o projeto Elixir
 print_info "Configurando projeto Elixir..."
 cd "$(dirname "$0")"
 
@@ -134,7 +142,7 @@ mix assets.build 2>/dev/null || print_warn "assets.build não configurado"
 print_info "Compilando projeto..."
 mix compile
 
-# 9. Cria arquivos de configuração se não existirem
+# 10. Cria arquivos de configuração se não existirem
 print_info "Verificando arquivos de configuração..."
 if [ ! -f "priv/user_info.json" ]; then
     print_info "Criando priv/user_info.json padrão..."

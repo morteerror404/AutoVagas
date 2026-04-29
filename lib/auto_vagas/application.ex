@@ -7,8 +7,8 @@ defmodule AutoVagas.Application do
 
   @impl true
   def start(_type, _args) do
-    AutoVagas.Mnesia.Schema.init()
-    AutoVagas.Mnesia.Schema.wait_for_tables()
+    # Inicializa Mnesia de forma segura (não falha se já existir)
+    start_mnesia()
     AutoVagas.Experience.initialize()
 
     children = [
@@ -26,6 +26,22 @@ defmodule AutoVagas.Application do
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: AutoVagas.Supervisor]
     Supervisor.start_link(children, opts)
+  end
+
+  defp start_mnesia do
+    require Logger
+    try do
+      AutoVagas.Mnesia.Schema.init()
+      case AutoVagas.Mnesia.Schema.wait_for_tables() do
+        :ok -> 
+          Logger.info("Mnesia tables ready")
+        other ->
+          Logger.warning("Mnesia wait_for_tables returned: #{inspect(other)}")
+      end
+    rescue
+      e ->
+        Logger.error("Erro ao iniciar Mnesia: #{inspect(e)}")
+    end
   end
 
   # Tell Phoenix to update the endpoint configuration
