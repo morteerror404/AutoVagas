@@ -41,6 +41,18 @@ config :esbuild,
     env: %{"NODE_PATH" => [Path.expand("../deps", __DIR__), Mix.Project.build_path()]}
   ]
 
+# Configure Wallaby to use Firefox Developer Edition via Selenium
+config :wallaby, driver: Wallaby.Selenium,
+  selenium: [
+    capabilities: %{
+      browserName: "firefox",
+      "moz:firefoxOptions": %{
+        binary: "/usr/bin/firefox-developer-edition",
+        args: ["-headless"]
+      }
+    }
+  ]
+
 # Configure tailwind (the version is required)
 config :tailwind,
   version: "4.1.12",

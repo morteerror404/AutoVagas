@@ -65,6 +65,21 @@ defmodule AutoVagas.Crawler.Worker do
       end)
     end
 
+    # Inicia processo de inscrição automática
+    case AutoVagas.Automation.start_session() do
+      {:ok, automation_session} ->
+        Logger.info("Iniciando inscrições automáticas")
+        Enum.each(jobs, fn job ->
+          if job["source"] == "linkedin" do
+            AutoVagas.Automation.apply_to_job(automation_session, job["url"], user_info)
+          end
+        end)
+        AutoVagas.Automation.end_session(automation_session)
+
+      {:error, reason} ->
+        Logger.warning("Não foi possível iniciar sessão de automação: #{inspect(reason)}")
+    end
+
     SearchManager.update_search_status(search_id, "completed")
 
     {:noreply, state}
@@ -105,7 +120,11 @@ defmodule AutoVagas.Crawler.Worker do
       end)
     end)
     |> Task.await_many(30_000)
-    |> Enum.flat_map(fn {:ok, jobs} -> jobs end)
+    |> Enum.flat_map(fn
+      jobs when is_list(jobs) -> jobs
+      {:ok, jobs} when is_list(jobs) -> jobs
+      _ -> []
+    end)
   end
 
   defp broadcast_jobs(jobs, search_id) do

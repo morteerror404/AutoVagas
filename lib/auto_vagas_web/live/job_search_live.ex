@@ -266,8 +266,8 @@ defmodule AutoVagasWeb.JobSearchLive do
 
         jobs = fetch_jobs(adapter, urls)
 
-        # Apply filters using Filters module
-        AutoVagas.Filters.apply_all(jobs, adapter, user_info)
+        # Apply filters using Filter module
+        AutoVagas.Crawler.Filter.apply(jobs, Map.get(user_info, "filters", %{}))
       end)
       |> Enum.uniq_by(fn job -> job["external_id"] end)
       |> Enum.map(&Map.put(&1, "selected", false))
@@ -302,6 +302,7 @@ defmodule AutoVagasWeb.JobSearchLive do
     end)
     |> Task.await_many(30_000)
     |> Enum.flat_map(fn
+      jobs when is_list(jobs) -> jobs
       {:ok, jobs} when is_list(jobs) -> jobs
       _ -> []
     end)

@@ -93,9 +93,9 @@ defmodule AutoVagas.Crawler.JobsCache do
     result = :mnesia.transaction(fn ->
       :mnesia.read(table, key)
     end)
-
+    
     jobs = case result do
-      {:atomic, [{^key, jobs, _updated_at}]} -> jobs
+      {:atomic, [{_, ^key, jobs, _updated_at}]} -> jobs
       _ -> []
     end
 
@@ -109,7 +109,7 @@ defmodule AutoVagas.Crawler.JobsCache do
     :mnesia.transaction(fn ->
       :mnesia.foldl(fn record, acc ->
         case record do
-          {key, jobs, updated_at} when updated_at < cutoff ->
+          {_, key, jobs, updated_at} when updated_at < cutoff ->
             :mnesia.delete_object({table, key, jobs, updated_at})
             acc
 
@@ -126,7 +126,7 @@ defmodule AutoVagas.Crawler.JobsCache do
     table = state.table_name
 
     result = :mnesia.transaction(fn ->
-      :mnesia.foldl(fn {key, _, _}, acc -> [key | acc] end, [], table)
+      :mnesia.foldl(fn {_, key, _, _}, acc -> [key | acc] end, [], table)
     end)
 
     keys = case result do

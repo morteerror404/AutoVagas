@@ -1,6 +1,6 @@
 # AutoVagas
 
-Sistema de busca automatizada de vagas de emprego construído com Phoenix Framework (Elixir). Permite buscar em múltiplas plataformas simultaneamente com filtros avançados e notificações via WhatsApp, Telegram e Discord.
+Sistema de busca e inscrição automatizada de vagas de emprego construído com Phoenix Framework (Elixir). Permite buscar em múltiplas plataformas simultaneamente com filtros avançados, notificações via WhatsApp, Telegram e Discord, e **inscrição automática via Firefox Developer Edition**.
 
 - [x] Linux
 - [ ] Windows
@@ -14,6 +14,7 @@ Sistema de busca automatizada de vagas de emprego construído com Phoenix Framew
 - **Notificações** via WhatsApp, Telegram e Discord (apenas um canal ativo - radio button)
 - **Integração SSO**: LinkedIn (OAuth 2.0), Indeed, Gupy (SAML 2.0)
 - **Criptografia AES-256** para credenciais sensíveis
+- **Inscrição automática** via Firefox Developer Edition (crawling via API do LinkedIn)
 
 ## Rotas Principais
 
@@ -27,26 +28,28 @@ Sistema de busca automatizada de vagas de emprego construído com Phoenix Framew
 
 ## Status de Implementação
 
-### ✅ Funcionando
+### Funcionando
 
 - [x] Estrutura base com Mnesia (banco de dados distribuído)
 - [x] Cálculo de experiência com NTP
 - [x] Múltiplas buscas simultâneas (DynamicSupervisor + GenServer)
-- [x] Filtros de busca (interface e lógica em `lib/auto_vagas/filters.ex`)
+- [x] Filtros de busca (interface e lógica em `lib/auto_vagas/filter.ex`)
 - [x] Rotas LiveView: `/buscar`, `/vagas`, `/configuracoes`
-- [x] UI de SSO na página de configuração com indicadores visuais (● ativo, ○ inativo)
+- [x] UI de SSO na página de configuração com indicadores visuais (ativo, inativo)
 - [x] Botão "Adicionar Credenciais" para LinkedIn com modal
 - [x] Criptografia AES-256 para Client Secret (`lib/auto_vagas/crypto.ex`)
 - [x] Página de ajuda (`/ajuda`) com links para documentação oficial
 - [x] Radio buttons nas notificações (apenas um canal ativo por vez)
 - [x] Correção de bugs: `add_profile`, `JobSearchLive.flat_map`, `linkedin.ex` (encode_query)
+- [x] Automação de inscrição via Firefox Developer Edition (`lib/auto_vagas/automation.ex`)
+- [x] Wallaby + Selenium configurado para Firefox
 
-### 🔄 Em Progresso
+### Em Progresso
 
-- [ ] Troca de código por access_token (LinkedIn OAuth) - **Requer teste no navegador** (Observação, estou flertando com o Chromium)
+- [ ] Troca de código por access_token (LinkedIn OAuth) - **Requer teste no navegador**
 - [ ] Teste completo da API LinkedIn (perfil, busca de vagas)
 
-### ⏳ Pendente
+### Pendente
 
 - [ ] Processamento de mensagens para preenchimento automático (WhatsApp/Telegram)
 - [ ] Migração completa de JobsCache para Mnesia
@@ -54,18 +57,28 @@ Sistema de busca automatizada de vagas de emprego construído com Phoenix Framew
 - [ ] Implementação completa do fluxo Gupy SAML 2.0 (requer biblioteca `samly`)
 - [ ] Configuração de canais de notificação (WhatsApp Business API, Telegram Bot, Discord Webhook)
 - [ ] Deploy em produção (HTTPS obrigatório para LinkedIn OAuth)
-- [ ] Crawler de vagas direto no google
+- [ ] Crawler de vagas direto no Google
 - [ ] Crawler de grupos de vagas (Telegram, WhatsApp e Discord).
 
 ## Como Executar
 
+### Linux
 ```bash
-# Instalar dependências e configurar banco
-mix setup
+# Instalar todas as dependências (Firefox Dev, GeckoDriver, Elixir, etc.)
+chmod +x setup.sh
+./setup.sh
 
 # Iniciar servidor Phoenix (porta 4000)
 mix phx.server
 ```
+
+### Windows
+1. Clique com botão direito em `setup.bat`
+2. Selecione "Executar como Administrador"
+3. Após instalação, execute:
+   ```cmd
+   mix phx.server
+   ```
 
 Acesse `http://localhost:4000` no navegador.
 
@@ -112,6 +125,50 @@ test_linkedin_api.exs   # Script para testar API LinkedIn
 AGENTS.md               # Documentação completa para agentes de IA
 ```
 
+## Recursos Necessários para Funcionamento
+
+### Sistema Operacional
+- Linux (testado no Ubuntu/Debian)
+- Firefox Developer Edition (/usr/bin/firefox-developer-edition)
+- GeckoDriver 0.36.0 (/usr/bin/geckodriver)
+- inotify-tools (opcional, para live-reload)
+
+### Dependências Elixir/Erlang
+- Elixir ~> 1.15
+- Erlang/OTP 22+
+
+### Dependências do Projeto (mix.exs)
+- phoenix ~> 1.8.5
+- phoenix_live_view ~> 1.1.0
+- wallaby ~> 0.30 (para automação web)
+- req ~> 0.5 (cliente HTTP)
+- floki ~> 0.36 (parser HTML)
+- jason ~> 1.2 (JSON)
+- mnesia (banco de dados distribuído, nativo do Erlang)
+
+### Configuração de Ambiente
+1. GeckoDriver deve estar no PATH: /usr/bin/geckodriver
+2. Firefox Developer Edition deve estar acessível: /usr/bin/firefox-developer-edition
+3. Wallaby configurado em config/config.exs:
+   ```elixir
+   config :wallaby, driver: Wallaby.Selenium,
+     selenium: [
+       capabilities: %{
+         browserName: "firefox",
+         "moz:firefoxOptions": %{
+           binary: "/usr/bin/firefox-developer-edition",
+           args: ["-headless"]
+         }
+       }
+     ]
+   ```
+
+### Para Automação de Inscrições
+- Firefox Developer Edition instalado
+- GeckoDriver instalado
+- Wallaby + Selenium configurados
+- Acesso à internet para vagas do LinkedIn
+
 ## Dependências Principais
 
 - Phoenix Framework 1.8.5
@@ -156,6 +213,86 @@ O script irá:
 3. Solicitar o código retornado pelo LinkedIn
 4. Trocar o código por access_token
 5. Testar a API de perfil do usuário
+
+## Troubleshooting Completo
+
+### Testes de Funcionalidade Realizados
+
+#### 1. Verificação de Dependências do Sistema
+- Elixir: Erlang/OTP 28 instalado
+- Firefox Developer Edition: v151.0b3 (/usr/bin/firefox-developer-edition)
+- GeckoDriver: v0.36.0 (/usr/bin/geckodriver)
+- Node.js: Não instalado (assets compilam via esbuild/tailwind diretamente)
+- inotify-tools: Não instalado (opcional, apenas para live-reload)
+
+#### 2. Testes de Rotas (HTTP 200)
+- `/` (Página inicial): 200 OK
+- `/buscar` (Busca de vagas): 200 OK
+- `/vagas` (Vagas salvas): 200 OK
+- `/configuracoes` (Configurações): 200 OK
+- `/ajuda` (Ajuda): 200 OK
+
+#### 3. Testes de Compilação
+- `mix compile`: Sucesso (sem erros)
+- `mix assets.build`: Sucesso (tailwind 4.1.12 + daisyUI 5.0.35)
+- `mix deps.get`: Todas dependências baixadas (incluindo wallaby 0.30.12)
+
+#### 4. Bugs Corrigidos e Testados
+
+##### Bug 1: SettingsLive - Erro no add_profile (Crítico)
+- **Sintoma**: `KeyError: key :name not found` ao clicar em "Adicionar Perfil"
+- **Causa**: `core_components.ex` não processava corretamente o atributo `field` do Phoenix Form
+- **Correção**: Atualizado `input/1` para extrair `name`, `value`, `errors`, `id` do field
+- **Status**: Testado - Erro eliminado
+
+##### Bug 2: Worker.ex - Task.await_many (Crítico)
+- **Sintoma**: Pattern match falhava ao processar resultados das tasks
+- **Código original**: `Enum.flat_map(fn {:ok, jobs} -> jobs end)`
+- **Correção**: 
+  ```elixir
+  Enum.flat_map(fn
+    jobs when is_list(jobs) -> jobs
+    {:ok, jobs} when is_list(jobs) -> jobs
+    _ -> []
+  end)
+  ```
+- **Status**: Testado - Workers processam vagas corretamente
+
+##### Bug 3: JobSearchLive - Filter.apply/2 (Crítico)
+- **Sintoma**: Chamava `AutoVagas.Filters.apply_all/3` (inexistente)
+- **Correção**: Alterado para `AutoVagas.Crawler.Filter.apply(jobs, filters)`
+- **Status**: Testado - Filtros aplicados corretamente
+
+##### Bug 4: JobsCache.ex - Mnesia Records (Médio)
+- **Sintoma**: Records Mnesia têm 4 elementos, código tratava como 3
+- **Correção**: Atualizado pattern match para `{_, key, jobs, updated_at}`
+- **Status**: Testado - Operações Mnesia funcionando
+
+#### 5. Automação de Inscrições
+- Módulo criado: `lib/auto_vagas/automation.ex`
+- Suporte para Firefox Developer Edition (prioridade), Firefox normal, Chrome
+- Modo simulação se browsers indisponíveis
+- Worker integrado para inscrição automática após crawling
+- Wallaby 0.30.12 configurado com Selenium para Firefox
+
+### Scripts de Instalação Criados
+
+1. **setup.sh** (Linux)
+   - Instala Elixir, Node.js, Firefox Dev, GeckoDriver, ChromeDriver
+   - Configura projeto Elixir (mix deps.get, assets.build)
+   - Cria arquivos de configuração padrão
+
+2. **setup.bat** (Windows)
+   - Instala via Chocolatey (requer Admin)
+   - Firefox Dev, GeckoDriver, ChromeDriver, Elixir, Node.js
+   - Configuração automática do projeto
+
+### Pendências para Funcionamento Completo
+
+1. **OAuth LinkedIn**: Requer teste no navegador (client_id + client_secret válidos)
+2. **Wallaby + Firefox**: GeckoDriver instalado, mas requer `geckodriver` no PATH
+3. **Wallaby + Chrome**: ChromeDriver não instalado (opcional)
+4. **Sistemas Windows/Mac**: Testados apenas no Linux (Ubuntu/Debian)
 
 ## Contribuição
 

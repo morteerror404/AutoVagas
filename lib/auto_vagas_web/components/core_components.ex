@@ -274,23 +274,40 @@ defmodule AutoVagasWeb.CoreComponents do
 
   # All other inputs text, datetime-local, url, password, etc. are handled here...
   def input(assigns) do
+    assigns = assign_new(assigns, :field, fn -> nil end)
+    
+    assigns = 
+      if assigns.field do
+        assigns
+        |> assign(:input_name, assigns.field.name)
+        |> assign(:input_value, Phoenix.HTML.Form.normalize_value(assigns.type, assigns.field.value))
+        |> assign(:input_errors, assigns.field.errors)
+        |> assign(:input_id, assigns.field.id)
+      else
+        assigns
+        |> assign(:input_name, Map.get(assigns, :name))
+        |> assign(:input_value, Phoenix.HTML.Form.normalize_value(assigns.type, Map.get(assigns, :value)))
+        |> assign(:input_errors, Map.get(assigns, :errors, []))
+        |> assign(:input_id, Map.get(assigns, :id))
+      end
+    
     ~H"""
     <div class="fieldset mb-2">
-      <label for={@id}>
+      <label for={@input_id}>
         <span :if={@label} class="label mb-1">{@label}</span>
         <input
           type={@type}
-          name={@name}
-          id={@id}
-          value={Phoenix.HTML.Form.normalize_value(@type, @value)}
+          name={@input_name}
+          id={@input_id}
+          value={@input_value}
           class={[
             @class || "w-full input",
-            @errors != [] && (@error_class || "input-error")
+            @input_errors != [] && (@error_class || "input-error")
           ]}
           {@rest}
         />
       </label>
-      <.error :for={msg <- @errors}>{msg}</.error>
+      <.error :for={msg <- @input_errors}>{msg}</.error>
     </div>
     """
   end

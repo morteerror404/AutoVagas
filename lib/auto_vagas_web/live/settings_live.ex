@@ -962,7 +962,7 @@ defmodule AutoVagasWeb.SettingsLive do
 
     updated_profiles =
       Enum.map(socket.assigns.profiles, fn profile ->
-        form = socket.assigns.profile_forms["profile_#{profile.index}"]
+        form = socket.assigns.profile_forms["profile-#{profile.index}"]
 
         %{
           index: profile.index,
@@ -1047,9 +1047,9 @@ defmodule AutoVagasWeb.SettingsLive do
           "keywords" => Map.get(profile, "keywords", []) |> Enum.join(", "),
           "resources" => Map.get(profile, "resources", []) |> Enum.join(", "),
           "job_roles" => Map.get(profile, "job_roles", []) |> Enum.join(", ")
-        })
-
-      Map.put(acc, "profile_#{profile.index}", form)
+        }, as: "profile_#{profile.index}")
+      
+      Map.put(acc, "profile-#{profile.index}", form)
     end)
   end
 

@@ -67,7 +67,7 @@ defmodule AutoVagas.MixProject do
       {:dns_cluster, "~> 0.2.0"},
       {:bandit, "~> 1.5"},
       {:floki, "~> 0.36"},
-       {:wallaby, "~> 0.30", only: :test}
+       {:wallaby, "~> 0.30"}
     ]
   end
 
