@@ -46,8 +46,7 @@ defmodule AutoVagas.Filters do
   """
   def apply_global_min_experience(jobs, nil), do: jobs
   def apply_global_min_experience(jobs, _min_years) do
-    # Aqui seria necessário ter dados de experiência no job
-    # Por enquanto, retorna os jobs sem filtrar
+    # Implementação futura baseada no Python crawler
     jobs
   end
 
@@ -56,30 +55,27 @@ defmodule AutoVagas.Filters do
   """
   def apply_global_max_applications(jobs, nil), do: jobs
   def apply_global_max_applications(jobs, _max_apps) do
-    # Aqui seria necessário contar aplicações
-    # Por enquanto, retorna os jobs sem filtrar
+    # Implementação futura
     jobs
   end
 
   @doc """
-  Aplica filtro de apenas remotos.
+  Aplica filtro de apenas remoto.
   """
   def apply_global_remote_only(jobs, false), do: jobs
   def apply_global_remote_only(jobs, true) do
     Enum.filter(jobs, fn job ->
-      location = Map.get(job, "location", "")
-      String.contains?(location, "remote")
+      Map.get(job, "location", "") =~ ~r/remote/i
     end)
   end
 
   defp get_global_filters(user_info) do
-    filters = Map.get(user_info, "filters", %{})
-    Map.get(filters, "global", %{})
+    Map.get(user_info, "filters", %{})
+    |> Map.get("global", %{})
   end
 
   defp get_source_filters(user_info, source) do
-    filters = Map.get(user_info, "filters", %{})
-    by_source = Map.get(filters, "by_source", %{})
-    Map.get(by_source, source, %{})
+    Map.get(user_info, "filters", %{})
+    |> Map.get(source, %{})
   end
 end

@@ -6,16 +6,39 @@ defmodule AutoVagasWeb.SettingsLive do
   def render(assigns) do
     ~H"""
     <Layouts.app flash={@flash}>
-      <div class="max-w-4xl mx-auto p-6">
-        <h1 class="text-3xl font-bold text-base-content mb-2">{I18n.t(@locale, "settings")}</h1>
-        <p class="text-base-content/60 mb-8">{I18n.t(@locale, "profiles")}</p>
+      <div class="max-w-6xl mx-auto p-6">
+        <div class="mb-6">
+          <h1 class="text-3xl font-bold text-base-content"><%= I18n.t(@locale, "settings") %></h1>
+          <p class="text-base-content/60"><%= I18n.t(@locale, "profiles") %></p>
+        </div>
 
-        <div class="space-y-8">
+        <!-- Tabs -->
+        <div class="tabs tabs-boxed mb-6">
+          <a class={"tab " <> if(@active_tab == "profiles", do: "tab-active", else: "")}
+             phx-click="switch_tab" phx-value="profiles">
+            Perfis
+          </a>
+          <a class={"tab " <> if(@active_tab == "integrations", do: "tab-active", else: "")}
+             phx-click="switch_tab" phx-value="integrations">
+            Integrações
+          </a>
+          <a class={"tab " <> if(@active_tab == "notifications", do: "tab-active", else: "")}
+             phx-click="switch_tab" phx-value="notifications">
+            Notificações
+          </a>
+          <a class={"tab " <> if(@active_tab == "general", do: "tab-active", else: "")}
+             phx-click="switch_tab" phx-value="general">
+            Geral
+          </a>
+        </div>
+
+        <!-- Profiles Tab -->
+        <div :if={@active_tab == "profiles"}>
           <section class="bg-base-200 border border-base-300 rounded-lg p-6">
             <div class="flex items-center justify-between mb-4">
-              <h2 class="text-xl font-semibold text-base-content">{I18n.t(@locale, "profiles")}</h2>
+              <h2 class="text-xl font-semibold text-base-content">Perfis de Busca</h2>
               <button phx-click="add_profile" class="btn btn-primary btn-sm">
-                {I18n.t(@locale, "new_profile")}
+                Novo Perfil
               </button>
             </div>
 
@@ -23,7 +46,7 @@ defmodule AutoVagasWeb.SettingsLive do
               <div
                 :for={{id, profile} <- @streams.profiles}
                 id={id}
-                class="border border-base-300 rounded-lg p-4"
+                class="border border-base-300 rounded-lg p-4 bg-base-100"
               >
                 <.form
                   for={@profile_forms[id]}
@@ -34,7 +57,7 @@ defmodule AutoVagasWeb.SettingsLive do
                   <div class="flex gap-4 items-start">
                     <div class="flex-1">
                       <label class="block text-sm font-medium text-base-content mb-1">
-                        {I18n.t(@locale, "profile_name")}
+                        Nome do Perfil
                       </label>
                       <.input
                         field={@profile_forms[id][:name]}
@@ -55,7 +78,7 @@ defmodule AutoVagasWeb.SettingsLive do
 
                   <div>
                     <label class="block text-sm font-medium text-base-content mb-1">
-                      {I18n.t(@locale, "keywords")}
+                      Palavras-chave
                     </label>
                     <.input
                       field={@profile_forms[id][:keywords]}
@@ -68,7 +91,7 @@ defmodule AutoVagasWeb.SettingsLive do
                   <div class="grid grid-cols-2 gap-4">
                     <div>
                       <label class="block text-sm font-medium text-base-content mb-1">
-                        {I18n.t(@locale, "technologies")}
+                        Tecnologias
                       </label>
                       <.input
                         field={@profile_forms[id][:resources]}
@@ -79,7 +102,7 @@ defmodule AutoVagasWeb.SettingsLive do
                     </div>
                     <div>
                       <label class="block text-sm font-medium text-base-content mb-1">
-                        {I18n.t(@locale, "roles")}
+                        Funções
                       </label>
                       <.input
                         field={@profile_forms[id][:job_roles]}
@@ -92,7 +115,7 @@ defmodule AutoVagasWeb.SettingsLive do
 
                   <div class="flex justify-end">
                     <button type="submit" class="btn btn-primary btn-sm">
-                      {I18n.t(@locale, "save_all")} Perfil
+                      Salvar Perfil
                     </button>
                   </div>
                 </.form>
@@ -101,326 +124,175 @@ defmodule AutoVagasWeb.SettingsLive do
 
             <div :if={@profiles == []} class="text-center py-4 text-base-content/50">
               <button phx-click="add_profile" class="btn btn-primary">
-                {I18n.t(@locale, "create_profile")}
+                Criar Primeiro Perfil
               </button>
-          </div>
-        </section>
-
-        <section class="bg-base-200 border border-base-300 rounded-lg p-6">
-          <h2 class="text-xl font-bold text-base-content mb-4">Integrações e Autenticação</h2>
-          <p class="text-sm text-base-content/60 mb-4">
-            Configure a autenticação para sites que exigem login e gerencie integrações de notificações.
-          </p>
-
-          <div class="space-y-4">
-            <!-- LinkedIn SSO Card -->
-            <div class="border border-base-300 rounded-lg p-4">
-              <div class="flex items-center justify-between mb-2">
-                <div class="flex-1">
-                  <div class="flex items-center gap-2">
-                    <h3 class="font-medium text-base-content">LinkedIn</h3>
-                    <%= if @auth_status["linkedin"] == :active do %>
-                      <span class="w-3 h-3 rounded-full bg-success inline-block" title="Ativo"></span>
-                    <% end %>
-                    <%= if @auth_status["linkedin"] == :configured do %>
-                      <span class="w-3 h-3 rounded-full bg-success inline-block" title="Configurado"></span>
-                    <% end %>
-                    <%= if @auth_status["linkedin"] == :inactive do %>
-                      <span class="w-3 h-3 rounded-full border-2 border-base-300 inline-block" title="Inativo"></span>
-                    <% end %>
-                    <%= if @auth_status["linkedin"] == :error do %>
-                      <span class="w-3 h-3 rounded-full bg-error inline-block" title="Erro"></span>
-                    <% end %>
-                  </div>
-                  <p class="text-sm text-base-content/60">OAuth 2.0 - Autenticacao SSO</p>
-                  <a href="/ajuda" class="link link-primary text-xs">Ajuda para configurar</a>
-                </div>
-              </div>
-
-              <div class="flex items-center justify-between">
-                <div>
-                  <%= if @auth_status["linkedin"] == :active do %>
-                    <span class="text-sm text-success">● Ativo</span>
-                  <% end %>
-                  <%= if @auth_status["linkedin"] == :configured do %>
-                    <span class="text-sm text-success">[Configurado]</span>
-                  <% end %>
-                  <%= if @auth_status["linkedin"] == :inactive do %>
-                    <span class="text-sm text-base-content/60">○ Nao configurado</span>
-                  <% end %>
-                  <%= if @auth_status["linkedin"] == :error do %>
-                    <span class="text-sm text-error">[Erro na conexao]</span>
-                  <% end %>
-                </div>
-
-                <div class="flex gap-2">
-                  <button phx-click="show_creds_modal" phx-value-source="linkedin" class="btn btn-sm btn-outline btn-primary">
-                    Adicionar Credenciais
-                  </button>
-
-                  <%= if @auth_status["linkedin"] == :configured do %>
-                    <.link href={AutoVagas.Auth.LinkedIn.authorize_url()} class="btn btn-primary btn-sm">
-                      Reconectar
-                    </.link>
-                  <% end %>
-
-                  <%= if @auth_status["linkedin"] == :inactive do %>
-                    <.link href={AutoVagas.Auth.LinkedIn.authorize_url()} class="btn btn-primary btn-sm">
-                      Integrar
-                    </.link>
-                  <% end %>
-
-                  <%= if @auth_status["linkedin"] == :error do %>
-                    <button phx-click="retry_auth" phx-value-source="linkedin" class="btn btn-error btn-sm">
-                      Tentar Novamente
-                    </button>
-                  <% end %>
-                </div>
-              </div>
             </div>
+          </section>
+        </div>
 
-            <!-- Indeed SSO Card -->
-            <div class="border border-base-300 rounded-lg p-4">
-              <div class="flex items-center justify-between mb-2">
-                <div class="flex-1">
-                  <div class="flex items-center gap-2">
-                    <h3 class="font-medium text-base-content">Indeed</h3>
-                    <%= if @auth_status["indeed"] == :active do %>
-                      <span class="w-3 h-3 rounded-full bg-success inline-block" title="Ativo"></span>
-                    <% end %>
-                    <%= if @auth_status["indeed"] == :configured do %>
-                      <span class="w-3 h-3 rounded-full bg-success inline-block" title="Configurado"></span>
-                    <% end %>
-                    <%= if @auth_status["indeed"] == :inactive do %>
-                      <span class="w-3 h-3 rounded-full border-2 border-base-300 inline-block" title="Inativo"></span>
-                    <% end %>
-                    <%= if @auth_status["indeed"] == :error do %>
-                      <span class="w-3 h-3 rounded-full bg-error inline-block" title="Erro"></span>
-                    <% end %>
-                  </div>
-                  <p class="text-sm text-base-content/60">OAuth 2.0 / SSO - Candidatos e Empresas</p>
-                </div>
-              </div>
-
-              <div class="flex items-center justify-between">
-                <div>
-                  <%= if @auth_status["indeed"] == :active do %>
-                    <span class="text-sm text-success">● Ativo</span>
-                  <% end %>
-                  <%= if @auth_status["indeed"] == :configured do %>
-                    <span class="text-sm text-success">✓ Configurado</span>
-                  <% end %>
-                  <%= if @auth_status["indeed"] == :inactive do %>
-                    <span class="text-sm text-base-content/60">○ Não configurado</span>
-                  <% end %>
-                  <%= if @auth_status["indeed"] == :error do %>
-                    <span class="text-sm text-error">✕ Erro na conexão</span>
-                  <% end %>
-                </div>
-
-                <div>
-                  <%= if @auth_status["indeed"] == :inactive do %>
-                    <button phx-click="integrate_sso" phx-value-source="indeed" class="btn btn-primary btn-sm">
-                      Integrar
-                    </button>
-                  <% end %>
-
-                  <%= if @auth_status["indeed"] == :error do %>
-                    <button phx-click="retry_auth" phx-value-source="indeed" class="btn btn-error btn-sm">
-                      Tentar Novamente
-                    </button>
-                  <% end %>
-                </div>
-              </div>
-            </div>
-
-            <!-- Gupy SSO Card -->
-            <div class="border border-base-300 rounded-lg p-4">
-              <div class="flex items-center justify-between mb-2">
-                <div class="flex-1">
-                  <div class="flex items-center gap-2">
-                    <h3 class="font-medium text-base-content">Gupy</h3>
-                    <%= if @auth_status["gupy"] == :active do %>
-                      <span class="w-3 h-3 rounded-full bg-success inline-block" title="Ativo"></span>
-                    <% end %>
-                    <%= if @auth_status["gupy"] == :configured do %>
-                      <span class="w-3 h-3 rounded-full bg-success inline-block" title="Configurado"></span>
-                    <% end %>
-                    <%= if @auth_status["gupy"] == :inactive do %>
-                      <span class="w-3 h-3 rounded-full border-2 border-base-300 inline-block" title="Inativo"></span>
-                    <% end %>
-                    <%= if @auth_status["gupy"] == :error do %>
-                      <span class="w-3 h-3 rounded-full bg-error inline-block" title="Erro"></span>
-                    <% end %>
-                  </div>
-                  <p class="text-sm text-base-content/60">SAML 2.0 - Autenticação Corporativa</p>
-                </div>
-              </div>
-
-              <div class="flex items-center justify-between">
-                <div>
-                  <%= if @auth_status["gupy"] == :active do %>
-                    <span class="text-sm text-success">● Ativo</span>
-                  <% end %>
-                  <%= if @auth_status["gupy"] == :configured do %>
-                    <span class="text-sm text-success">✓ Configurado</span>
-                  <% end %>
-                  <%= if @auth_status["gupy"] == :inactive do %>
-                    <span class="text-sm text-base-content/60">○ Não configurado</span>
-                  <% end %>
-                  <%= if @auth_status["gupy"] == :error do %>
-                    <span class="text-sm text-error">✕ Erro na conexão</span>
-                  <% end %>
-                </div>
-
-                <div>
-                  <%= if @auth_status["gupy"] == :inactive do %>
-                    <button phx-click="integrate_sso" phx-value-source="gupy" class="btn btn-primary btn-sm">
-                      Integrar
-                    </button>
-                  <% end %>
-
-                  <%= if @auth_status["gupy"] == :error do %>
-                    <button phx-click="retry_auth" phx-value-source="gupy" class="btn btn-error btn-sm">
-                      Tentar Novamente
-                    </button>
-                  <% end %>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- SSO Difficulties Section -->
-        <section class="bg-base-200 border border-base-300 rounded-lg p-6 mt-4">
-          <h3 class="text-lg font-semibold text-base-content mb-3">Dificuldades para Implementar SSO</h3>
-
-          <div class="space-y-3">
-            <div class="p-3 bg-base-100 rounded">
-              <h4 class="font-medium text-base-content">LinkedIn OAuth 2.0</h4>
-              <ul class="text-sm text-base-content/80 mt-2 space-y-1">
-                <li><strong>[Facil]</strong> Fluxo padrao OAuth 2.0 com Authorization Code</li>
-                <li>Documentacao oficial clara da API</li>
-                <li>Biblioteca Req ja configurada</li>
-                <li><strong>[Atencao]</strong> Precisa de <code>client_id</code> e <code>client_secret</code> validos</li>
-              </ul>
-            </div>
-
-            <div class="p-3 bg-base-100 rounded">
-              <h4 class="font-medium text-base-content">Indeed OAuth 2.0</h4>
-              <ul class="text-sm text-base-content/80 mt-2 space-y-1">
-                <li><strong>[Medio]</strong> Dois fluxos diferentes (Candidatos vs Empresas)</li>
-                <li><strong>[Atencao]</strong> Documentacao limitada para integracao via SSO</li>
-                <li><strong>[Atencao]</strong> Pode exigir configuracao especial no portal do desenvolvedor</li>
-                <li><strong>[Pendente]</strong> Implementacao atual e apenas estrutural (sem token real)</li>
-              </ul>
-            </div>
-
-            <div class="p-3 bg-base-100 rounded">
-              <h4 class="font-medium text-base-content">Gupy SAML 2.0</h4>
-              <ul class="text-sm text-base-content/80 mt-2 space-y-1">
-                <li><strong>[Dificil]</strong> SAML 2.0 e complexo (XML, assinaturas digitais)</li>
-                <li><strong>[Pendente]</strong> Requer certificado X.509 (chave publica/privada)</li>
-                <li><strong>[Pendente]</strong> Phoenix nao tem suporte nativo a SAML (precisa de biblioteca como <code>samly</code>)</li>
-                <li><strong>[Pendente]</strong> Gupy pode exigir whitelist de IP/dominio da aplicacao</li>
-                <li><strong>[Pendente]</strong> Implementacao atual e apenas estrutural (sem fluxo real)</li>
-              </ul>
-            </div>
-          </div>
-        </section>
-
-        <section class="bg-base-200 border border-base-300 rounded-lg p-6">
-          <h2 class="text-xl font-semibold text-base-content mb-4">Canais de Notificacao</h2>
-          <p class="text-sm text-base-content/60 mb-4">
-            Configure canis para receber alertas de vagas pendentes. Apenas um canal pode estar ativo por vez.
-          </p>
-
-          <div class="space-y-4">
-            <div class="border border-base-300 rounded-lg p-4">
-              <div class="flex items-center justify-between mb-2">
-                <div>
-                  <h3 class="font-medium text-base-content">WhatsApp</h3>
-                  <p class="text-sm text-base-content/60">Alertas via WhatsApp Business</p>
-                </div>
-                <input
-                  type="radio"
-                  name="notification_channel"
-                  class="radio radio-primary"
-                  phx-click="toggle_channel"
-                  phx-value-channel="whatsapp"
-                  checked={@selected_channel == "whatsapp"}
-                />
-              </div>
-              <div :if={@notification_status["whatsapp"]} class="text-sm text-success">
-                [Ativo]
-              </div>
-              <div class="mt-2">
-                <button phx-click="config_channel" phx-value-channel="whatsapp" class="btn btn-sm btn-outline btn-primary">
-                  Configurar WhatsApp
-                </button>
-              </div>
-            </div>
-
-            <div class="border border-base-300 rounded-lg p-4">
-              <div class="flex items-center justify-between mb-2">
-                <div>
-                  <h3 class="font-medium text-base-content">Telegram</h3>
-                  <p class="text-sm text-base-content/60">Bot do Telegram</p>
-                </div>
-                <input
-                  type="radio"
-                  name="notification_channel"
-                  class="radio radio-primary"
-                  phx-click="toggle_channel"
-                  phx-value-channel="telegram"
-                  checked={@selected_channel == "telegram"}
-                />
-              </div>
-              <div :if={@notification_status["telegram"]} class="text-sm text-success">
-                [Ativo]
-              </div>
-              <div class="mt-2">
-                <button phx-click="config_channel" phx-value-channel="telegram" class="btn btn-sm btn-outline btn-primary">
-                  Configurar Telegram
-                </button>
-              </div>
-            </div>
-
-            <div class="border border-base-300 rounded-lg p-4">
-              <div class="flex items-center justify-between mb-2">
-                <div>
-                  <h3 class="font-medium text-base-content">Discord</h3>
-                  <p class="text-sm text-base-content/60">Webhook do Discord</p>
-                </div>
-                <input
-                  type="radio"
-                  name="notification_channel"
-                  class="radio radio-primary"
-                  phx-click="toggle_channel"
-                  phx-value-channel="discord"
-                  checked={@selected_channel == "discord"}
-                />
-              </div>
-              <div :if={@notification_status["discord"]} class="text-sm text-success">
-                [Ativo]
-              </div>
-              <div class="mt-2">
-                <button phx-click="config_channel" phx-value-channel="discord" class="btn btn-sm btn-outline btn-primary">
-                  Configurar Discord
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section class="bg-base-200 border border-base-300 rounded-lg p-6">
-          <h2 class="text-xl font-semibold text-base-content mb-4">
-            Sua Localização
-          </h2>
-            <p class="text-sm text-base-content/60 mb-4">
-              Informe sua localização para calcular distâncias das vagas.
+        <!-- Integrations Tab -->
+        <div :if={@active_tab == "integrations"}>
+          <section class="bg-base-200 border border-base-300 rounded-lg p-6">
+            <h2 class="text-xl font-bold text-base-content mb-4">Integrações e Autenticação</h2>
+            <p class="text-sm text-base-content/60 mb-6">
+              Configure a autenticação para sites que exigem login.
             </p>
 
+            <div class="space-y-4">
+              <!-- LinkedIn -->
+              <div class="border border-base-300 rounded-lg p-4 bg-base-100">
+                <div class="flex items-center justify-between mb-3">
+                  <div>
+                    <h3 class="font-medium text-base-content">LinkedIn</h3>
+                    <p class="text-sm text-base-content/60">OAuth 2.0</p>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class={
+                      "w-3 h-3 rounded-full " <>
+                      case @auth_status["linkedin"] do
+                        :active -> "bg-success"
+                        :configured -> "bg-success"
+                        :error -> "bg-error"
+                        _ -> "border-2 border-base-300"
+                      end
+                    }></span>
+                    <span class="text-sm">
+                      <%= case @auth_status["linkedin"] do
+                        :active -> "Ativo"
+                        :configured -> "Configurado"
+                        :error -> "Erro"
+                        _ -> "Inativo"
+                      end %>
+                    </span>
+                  </div>
+                </div>
+                <div class="flex gap-2">
+                  <button phx-click="show_creds_modal" phx-value-source="linkedin" class="btn btn-sm btn-outline btn-primary">
+                    Credenciais
+                  </button>
+                  <%= if @auth_status["linkedin"] in [:inactive, :error] do %>
+                    <.link href={AutoVagas.Auth.LinkedIn.authorize_url()} class="btn btn-sm btn-primary">
+                      Conectar
+                    </.link>
+                  <% end %>
+                </div>
+              </div>
+
+              <!-- Indeed -->
+              <div class="border border-base-300 rounded-lg p-4 bg-base-100">
+                <div class="flex items-center justify-between mb-3">
+                  <div>
+                    <h3 class="font-medium text-base-content">Indeed</h3>
+                    <p class="text-sm text-base-content/60">OAuth 2.0</p>
+                  </div>
+                  <span class="text-sm text-base-content/60">Em breve</span>
+                </div>
+              </div>
+
+              <!-- Gupy -->
+              <div class="border border-base-300 rounded-lg p-4 bg-base-100">
+                <div class="flex items-center justify-between mb-3">
+                  <div>
+                    <h3 class="font-medium text-base-content">Gupy</h3>
+                    <p class="text-sm text-base-content/60">SAML 2.0</p>
+                  </div>
+                  <span class="text-sm text-base-content/60">Em breve</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- SSO Help -->
+          <div class="mt-4">
+            <.link navigate="/ajuda" class="btn btn-sm btn-ghost">
+              Ajuda com integrações →
+            </.link>
+          </div>
+        </div>
+
+        <!-- Notifications Tab -->
+        <div :if={@active_tab == "notifications"}>
+          <section class="bg-base-200 border border-base-300 rounded-lg p-6">
+            <h2 class="text-xl font-semibold text-base-content mb-4">Canais de Notificação</h2>
+            <p class="text-sm text-base-content/60 mb-6">
+              Apenas um canal pode estar ativo por vez.
+            </p>
+
+            <div class="space-y-4">
+              <div class="border border-base-300 rounded-lg p-4 bg-base-100">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <h3 class="font-medium text-base-content">WhatsApp</h3>
+                    <p class="text-sm text-base-content/60">WhatsApp Business</p>
+                  </div>
+                  <input
+                    type="radio"
+                    name="notification_channel"
+                    class="radio radio-primary"
+                    phx-click="toggle_channel"
+                    phx-value-channel="whatsapp"
+                    checked={@selected_channel == "whatsapp"}
+                  />
+                </div>
+                <div class="mt-2">
+                  <button phx-click="config_channel" phx-value-channel="whatsapp" class="btn btn-sm btn-outline btn-primary">
+                    Configurar
+                  </button>
+                </div>
+              </div>
+
+              <div class="border border-base-300 rounded-lg p-4 bg-base-100">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <h3 class="font-medium text-base-content">Telegram</h3>
+                    <p class="text-sm text-base-content/60">Bot do Telegram</p>
+                  </div>
+                  <input
+                    type="radio"
+                    name="notification_channel"
+                    class="radio radio-primary"
+                    phx-click="toggle_channel"
+                    phx-value-channel="telegram"
+                    checked={@selected_channel == "telegram"}
+                  />
+                </div>
+                <div class="mt-2">
+                  <button phx-click="config_channel" phx-value-channel="telegram" class="btn btn-sm btn-outline btn-primary">
+                    Configurar
+                  </button>
+                </div>
+              </div>
+
+              <div class="border border-base-300 rounded-lg p-4 bg-base-100">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <h3 class="font-medium text-base-content">Discord</h3>
+                    <p class="text-sm text-base-content/60">Webhook</p>
+                  </div>
+                  <input
+                    type="radio"
+                    name="notification_channel"
+                    class="radio radio-primary"
+                    phx-click="toggle_channel"
+                    phx-value-channel="discord"
+                    checked={@selected_channel == "discord"}
+                  />
+                </div>
+                <div class="mt-2">
+                  <button phx-click="config_channel" phx-value-channel="discord" class="btn btn-sm btn-outline btn-primary">
+                    Configurar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- General Tab -->
+        <div :if={@active_tab == "general"}>
+          <!-- Location -->
+          <section class="bg-base-200 border border-base-300 rounded-lg p-6 mb-4">
+            <h2 class="text-xl font-semibold text-base-content mb-4">Sua Localização</h2>
             <div class="grid grid-cols-3 gap-4">
               <div>
                 <label class="block text-sm font-medium text-base-content mb-1">País</label>
@@ -433,9 +305,7 @@ defmodule AutoVagasWeb.SettingsLive do
                 />
               </div>
               <div>
-                <label class="block text-sm font-medium text-base-content mb-1">
-                  Estado/Província
-                </label>
+                <label class="block text-sm font-medium text-base-content mb-1">Estado</label>
                 <input
                   type="text"
                   name="user_state"
@@ -457,45 +327,33 @@ defmodule AutoVagasWeb.SettingsLive do
             </div>
           </section>
 
-          <section class="bg-base-200 border border-base-300 rounded-lg p-6">
-            <h2 class="text-xl font-semibold text-base-content mb-4">
-              {I18n.t(@locale, "general_settings")}
-            </h2>
+          <!-- Languages and Filters -->
+          <section class="bg-base-200 border border-base-300 rounded-lg p-6 mb-4">
+            <h2 class="text-xl font-semibold text-base-content mb-4">Configurações Gerais</h2>
 
             <.form for={@form} id="general-form" class="space-y-4">
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label class="block text-sm font-medium text-base-content mb-1">
-                    {I18n.t(@locale, "location")}
-                  </label>
+                  <label class="block text-sm font-medium text-base-content mb-1">Localização Padrão</label>
                   <.input field={@form[:location]} type="text" placeholder="Brazil" class="w-full" />
                 </div>
 
                 <div>
-                  <label class="block text-sm font-medium text-base-content mb-1">
-                    {I18n.t(@locale, "languages")}
-                  </label>
+                  <label class="block text-sm font-medium text-base-content mb-1">Idiomas</label>
                   <div class="flex flex-wrap gap-2 mb-2">
                     <span :for={lang <- @selected_languages} class="badge badge-primary gap-1">
-                      {I18n.t(@locale, lang)}
-                      <button
-                        phx-click="remove_language"
-                        phx-value={lang}
-                        class="btn btn-ghost btn-xs"
-                      >
-                        ✕
-                      </button>
+                      <%= I18n.t(@locale, lang) %>
+                      <button phx-click="remove_language" phx-value={lang} class="btn btn-ghost btn-xs">✕</button>
                     </span>
                   </div>
                   <select
                     name="language"
-                    id="language-select"
                     class="select select-bordered w-full"
                     phx-change="add_language"
                   >
-                    <option value="">{I18n.t(@locale, "add_language")}</option>
+                    <option value="">Adicionar idioma</option>
                     <option :for={{label, code} <- I18n.language_options(@locale)} value={code}>
-                      {label}
+                      <%= label %>
                     </option>
                   </select>
                 </div>
@@ -503,9 +361,7 @@ defmodule AutoVagasWeb.SettingsLive do
 
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label class="block text-sm font-medium text-base-content mb-1">
-                    {I18n.t(@locale, "time_posted")}
-                  </label>
+                  <label class="block text-sm font-medium text-base-content mb-1">Tempo de Postagem</label>
                   <.input
                     field={@form[:time_posted]}
                     type="select"
@@ -515,9 +371,7 @@ defmodule AutoVagasWeb.SettingsLive do
                 </div>
 
                 <div>
-                  <label class="block text-sm font-medium text-base-content mb-1">
-                    {I18n.t(@locale, "work_type")}
-                  </label>
+                  <label class="block text-sm font-medium text-base-content mb-1">Tipo de Trabalho</label>
                   <.input
                     field={@form[:work_type]}
                     type="select"
@@ -529,177 +383,73 @@ defmodule AutoVagasWeb.SettingsLive do
             </.form>
           </section>
 
-          <section class="bg-base-200 border border-base-300 rounded-lg p-6">
-            <h2 class="text-xl font-semibold text-base-content mb-4">
-              {I18n.t(@locale, "work_config")}
-            </h2>
+          <!-- Import Resume -->
+          <section class="bg-base-200 border border-base-300 rounded-lg p-6 mb-4">
+            <h2 class="text-xl font-semibold text-base-content mb-4">Importar Currículo</h2>
 
-            <.form for={@work_form} id="work-form" class="space-y-4">
-              <div class="grid grid-cols-3 gap-4">
-                <div class="border border-base-300 rounded-lg p-4">
-                  <h3 class="font-medium text-base-content mb-2">
-                    {I18n.t(@locale, "on_site_config")}
-                  </h3>
-                  <div class="space-y-2">
-                    <div>
-                      <label class="block text-xs text-base-content/60 mb-1">
-                        {I18n.t(@locale, "max_distance")}
-                      </label>
-                      <.input
-                        field={@work_form[:on_site_distance]}
-                        type="number"
-                        placeholder="30"
-                        class="w-full"
-                      />
-                    </div>
-                    <div>
-                      <label class="block text-xs text-base-content/60 mb-1">
-                        {I18n.t(@locale, "countries")}
-                      </label>
-                      <.input
-                        field={@work_form[:on_site_countries]}
-                        type="text"
-                        placeholder="Brazil, USA..."
-                        class="w-full"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div class="border border-base-300 rounded-lg p-4">
-                  <h3 class="font-medium text-base-content mb-2">
-                    {I18n.t(@locale, "hybrid_config")}
-                  </h3>
-                  <div class="space-y-2">
-                    <div>
-                      <label class="block text-xs text-base-content/60 mb-1">
-                        {I18n.t(@locale, "max_distance")}
-                      </label>
-                      <.input
-                        field={@work_form[:hybrid_distance]}
-                        type="number"
-                        placeholder="50"
-                        class="w-full"
-                      />
-                    </div>
-                    <div>
-                      <label class="block text-xs text-base-content/60 mb-1">
-                        {I18n.t(@locale, "countries")}
-                      </label>
-                      <.input
-                        field={@work_form[:hybrid_countries]}
-                        type="text"
-                        placeholder="Brazil, USA..."
-                        class="w-full"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div class="border border-base-300 rounded-lg p-4">
-                  <h3 class="font-medium text-base-content mb-2">
-                    {I18n.t(@locale, "remote_config")}
-                  </h3>
-                  <div class="space-y-2">
-                    <div>
-                      <label class="block text-xs text-base-content/60 mb-1">
-                        {I18n.t(@locale, "max_distance")}
-                      </label>
-                      <.input
-                        field={@work_form[:remote_distance]}
-                        type="number"
-                        placeholder="1000"
-                        class="w-full"
-                      />
-                    </div>
-                    <div>
-                      <label class="block text-xs text-base-content/60 mb-1">
-                        {I18n.t(@locale, "countries")}
-                      </label>
-                      <.input
-                        field={@work_form[:remote_countries]}
-                        type="text"
-                        placeholder="Brazil, USA..."
-                        class="w-full"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </.form>
-          </section>
-
-          <section class="bg-base-200 border border-base-300 rounded-lg p-6">
-            <div class="flex items-center justify-between mb-4">
-              <h2 class="text-xl font-semibold text-base-content">
-                {I18n.t(@locale, "import_resume")}
-              </h2>
+            <div class="mb-4">
               <button phx-click="toggle_help" class="btn btn-ghost btn-sm">
-                {if @show_help, do: I18n.t(@locale, "close_help"), else: I18n.t(@locale, "help")}
+                <%= if @show_help, do: "Fechar Ajuda", else: "Ajuda" %>
               </button>
             </div>
 
             <div :if={@show_help} class="alert alert-info mb-4">
               <div>
-                <strong class="block text-base-content mb-2">
-                  {I18n.t(@locale, "how_to_export")}
-                </strong>
-                <ol class="list-decimal list-inside text-sm text-base-content/80 space-y-1">
+                <strong>Como exportar:</strong>
+                <ol class="list-decimal list-inside text-sm mt-2">
                   <li>LinkedIn → Mais → Salvar em PDF</li>
                 </ol>
               </div>
             </div>
 
-            <div :if={not @show_help} class="space-y-4">
-              <div
-                id="upload-dropzone"
-                phx-drop="set-upload"
-                class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-base-300 rounded-lg cursor-pointer hover:border-primary transition-colors"
-              >
-                <div class="flex flex-col items-center justify-center">
-                  <.icon name="hero-document-arrow-up" class="w-8 h-8 mb-2 text-base-content/60" />
-                  <p class="text-sm text-base-content/60">
-                    {if @uploading, do: "Processando...", else: I18n.t(@locale, "upload_pdf")}
-                  </p>
-                </div>
-              </div>
-
-              <form id="upload-form" phx-submit="save_upload">
-                <input
-                  type="file"
-                  id="pdf-upload"
-                  name="pdf"
-                  accept=".pdf"
-                  class="hidden"
-                  phx-upload="set-upload"
-                />
-                <button :if={@uploads.pdf.entries != []} type="submit" class="btn btn-primary">
-                  {I18n.t(@locale, "process_resume")}
-                </button>
-              </form>
-
-              <div
-                :if={@upload_message}
-                class="alert {if @upload_error, do: 'alert-error', else: 'alert-success'}"
-              >
-                {@upload_message}
+            <div
+              id="upload-dropzone"
+              phx-drop="set-upload"
+              class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-base-300 rounded-lg cursor-pointer hover:border-primary transition-colors"
+            >
+              <div class="flex flex-col items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 mb-2 text-base-content/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+                <p class="text-sm text-base-content/60">
+                  <%= if @uploading, do: "Processando...", else: "Clique ou arraste um PDF" %>
+                </p>
               </div>
             </div>
+
+            <form id="upload-form" phx-submit="save_upload">
+              <input
+                type="file"
+                id="pdf-upload"
+                name="pdf"
+                accept=".pdf"
+                class="hidden"
+                phx-upload="set-upload"
+              />
+              <button :if={@uploads.pdf.entries != []} type="submit" class="btn btn-primary mt-4">
+                Processar Currículo
+              </button>
+            </form>
+
+            <div :if={@upload_message} class={"alert mt-4 " <> if(@upload_error, do: "alert-error", else: "alert-success")}>
+              <%= @upload_message %>
+            </div>
           </section>
-
-          <div class="flex justify-end">
-            <button phx-click="save_all" class="btn btn-primary btn-lg">
-              {I18n.t(@locale, "save_all")}
-            </button>
-          </div>
         </div>
-         </div>
 
-      <!-- Modal de Credenciais -->
+        <!-- Save Button -->
+        <div class="flex justify-end mt-6">
+          <button phx-click="save_all" class="btn btn-primary">
+            <%= I18n.t(@locale, "save_all") %>
+          </button>
+        </div>
+      </div>
+
+      <!-- Credentials Modal -->
       <%= if @show_creds_modal do %>
         <div class="modal modal-open">
           <div class="modal-box">
-            <h3 class="font-bold text-lg mb-4">Adicionar Credenciais - <%= @creds_source |> String.capitalize() %></h3>
+            <h3 class="font-bold text-lg mb-4">Credenciais - <%= String.capitalize(@creds_source) %></h3>
 
             <div class="space-y-4">
               <div>
@@ -710,21 +460,19 @@ defmodule AutoVagasWeb.SettingsLive do
                   value={@creds_client_id}
                   phx-keyup="update_creds_field"
                   phx-value-field="client_id"
-                  phx-debounce="0"
                 />
               </div>
 
               <div>
-                <label class="block text-sm font-medium mb-1">Primary Client Secret</label>
+                <label class="block text-sm font-medium mb-1">Client Secret</label>
                 <input
                   type="password"
                   class="input input-bordered w-full"
                   value={@creds_client_secret}
                   phx-keyup="update_creds_field"
                   phx-value-field="client_secret"
-                  phx-debounce="0"
                 />
-                <p class="text-xs text-base-content/60 mt-1">Criptografado com AES-256 antes de salvar</p>
+                <p class="text-xs text-base-content/60 mt-1">Criptografado com AES-256</p>
               </div>
             </div>
 
@@ -735,7 +483,7 @@ defmodule AutoVagasWeb.SettingsLive do
           </div>
         </div>
       <% end %>
-      </Layouts.app>
+    </Layouts.app>
     """
   end
 
@@ -777,7 +525,6 @@ defmodule AutoVagasWeb.SettingsLive do
     profile_forms = build_profile_forms(profiles)
     selected_languages = Map.get(user_info, "languages", [])
 
-    # Load auth and notification statuses
     auth_status = load_auth_status()
     notification_status = load_notification_status()
     selected_channel = get_selected_channel(notification_status)
@@ -786,6 +533,8 @@ defmodule AutoVagasWeb.SettingsLive do
 
     {:ok,
      socket
+     |> assign(:active_page, "configuracoes")
+     |> assign(:active_tab, "profiles")
      |> assign(form: form, work_form: work_form, language_input: language_input)
      |> assign(profiles: profiles, profile_forms: profile_forms)
      |> assign(selected_languages: selected_languages)
@@ -796,6 +545,10 @@ defmodule AutoVagasWeb.SettingsLive do
      |> stream_configure(:profiles, dom_id: &"profile-#{&1.index}")
      |> stream(:profiles, profiles, reset: true)
      |> allow_upload(:pdf, accept: [".pdf"], max_entries: 1, max_file_size: 10_000_000)}
+  end
+
+  def handle_event("switch_tab", %{"tab" => tab}, socket) do
+    {:noreply, assign(socket, :active_tab, tab)}
   end
 
   def handle_event("toggle_help", _, socket),
@@ -878,16 +631,6 @@ defmodule AutoVagasWeb.SettingsLive do
     end
   end
 
-  def handle_event("toggle_auth", %{"source" => source}, socket) do
-    auth_status = socket.assigns.auth_status
-    current = Map.get(auth_status, source, false)
-    updated = Map.put(auth_status, source, not current)
-
-    # Here you would trigger the actual auth flow
-    # For now, we just toggle the status
-    {:noreply, assign(socket, auth_status: updated)}
-  end
-
   def handle_event("toggle_channel", %{"channel" => channel}, socket) do
     notification_status = socket.assigns.notification_status
     selected_channel = socket.assigns.selected_channel
@@ -901,29 +644,6 @@ defmodule AutoVagasWeb.SettingsLive do
       end
 
     {:noreply, assign(socket, notification_status: updated_status, selected_channel: new_selected)}
-  end
-
-  def handle_event("integrate_sso", %{"source" => source}, socket) do
-    cond do
-      source == "linkedin" ->
-        url = AutoVagas.Auth.LinkedIn.authorize_url()
-        {:noreply, redirect(socket, external: url)}
-      source == "indeed" ->
-        # Implement Indeed OAuth flow
-        {:noreply, socket}
-      source == "gupy" ->
-        # Implement Gupy SAML flow
-        {:noreply, socket}
-      true ->
-        {:noreply, socket}
-    end
-  end
-
-  def handle_event("retry_auth", %{"source" => source}, socket) do
-    # Retry logic for failed auth
-    auth_status = socket.assigns.auth_status
-    updated = Map.put(auth_status, source, :inactive)
-    {:noreply, assign(socket, auth_status: updated)}
   end
 
   def handle_event("remove_language", %{"language" => lang}, socket) do
@@ -962,15 +682,20 @@ defmodule AutoVagasWeb.SettingsLive do
 
     updated_profiles =
       Enum.map(socket.assigns.profiles, fn profile ->
-        form = socket.assigns.profile_forms["profile-#{profile.index}"]
+        form_key = "profile-#{profile.index}"
+        profile_form = Map.get(socket.assigns.profile_forms, form_key)
 
-        %{
-          index: profile.index,
-          name: form[:name].value,
-          keywords: parse_list(form[:keywords].value),
-          resources: parse_list(form[:resources].value),
-          job_roles: parse_list(form[:job_roles].value)
-        }
+        if profile_form do
+          %{
+            index: profile.index,
+            name: profile_form[:name].value,
+            keywords: parse_list(profile_form[:keywords].value),
+            resources: parse_list(profile_form[:resources].value),
+            job_roles: parse_list(profile_form[:job_roles].value)
+          }
+        else
+          profile
+        end
       end)
 
     current_user_info = load_user_info()
@@ -1007,7 +732,7 @@ defmodule AutoVagasWeb.SettingsLive do
     }
 
     save_user_info(user_info)
-    {:noreply, put_flash(socket, :info, "Salvo!")}
+    {:noreply, put_flash(socket, :info, "Configurações salvas!")}
   end
 
   def handle_info({:process_upload, path, _filename}, socket) do
@@ -1027,12 +752,12 @@ defmodule AutoVagasWeb.SettingsLive do
 
         {:noreply,
          assign(socket,
-            uploading: false,
-            upload_message: "Currículo importado!",
-            upload_error: false,
-            profiles: profiles,
-            profile_forms: profile_forms
-          )}
+           uploading: false,
+           upload_message: "Currículo importado!",
+           upload_error: false,
+           profiles: profiles,
+           profile_forms: profile_forms
+         )}
 
       {:error, msg} ->
         {:noreply, assign(socket, uploading: false, upload_message: msg, upload_error: true)}
@@ -1048,7 +773,7 @@ defmodule AutoVagasWeb.SettingsLive do
           "resources" => Map.get(profile, "resources", []) |> Enum.join(", "),
           "job_roles" => Map.get(profile, "job_roles", []) |> Enum.join(", ")
         }, as: "profile_#{profile.index}")
-      
+
       Map.put(acc, "profile-#{profile.index}", form)
     end)
   end
@@ -1071,7 +796,6 @@ defmodule AutoVagasWeb.SettingsLive do
 
   defp load_auth_status do
     user_info = load_user_info()
-    # Check if auth sessions exist for each source
     %{
       "linkedin" => Map.get(user_info, "linkedin_auth", false),
       "indeed" => Map.get(user_info, "indeed_auth", false),

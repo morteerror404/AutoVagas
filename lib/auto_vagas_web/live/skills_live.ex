@@ -10,6 +10,7 @@ defmodule AutoVagasWeb.SkillsLive do
     
     {:ok, 
      socket
+     |> assign(:active_page, "habilidades")
      |> assign(:user_info, user_info)
      |> assign(:skills, skills)
      |> assign(:active_tab, "technical")

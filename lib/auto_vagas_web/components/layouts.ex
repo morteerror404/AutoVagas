@@ -14,17 +14,43 @@ defmodule AutoVagasWeb.Layouts do
     ~H"""
     <header class="navbar bg-base-200 border-b border-base-300 px-4 sm:px-6 lg:px-8">
       <div class="flex-1">
-        <a href="/" class="flex items-center gap-2">
+        <.link navigate="/" class="flex items-center gap-2">
           <.icon name="hero-briefcase" class="w-8 h-8 text-primary" />
           <span class="text-xl font-bold text-base-content">AutoVagas</span>
-        </a>
+        </.link>
       </div>
       <div class="flex-none">
         <ul class="menu menu-horizontal px-1 gap-1">
-          <li><.link navigate="/" class="btn btn-ghost btn-sm">Início</.link></li>
-          <li><.link navigate="/buscar" class="btn btn-ghost btn-sm">Buscar Vagas</.link></li>
-          <li><.link navigate="/vagas" class="btn btn-ghost btn-sm">Vagas Capturadas</.link></li>
-          <li><.link navigate="/configuracoes" class="btn btn-ghost btn-sm">Configurações</.link></li>
+          <li>
+            <.link navigate="/" class={"btn btn-sm " <> if(@active_page == "home", do: "btn-active", else: "btn-ghost")}>
+              Início
+            </.link>
+          </li>
+          <li>
+            <.link navigate="/buscar" class={"btn btn-sm " <> if(@active_page == "buscar", do: "btn-active", else: "btn-ghost")}>
+              Buscar
+            </.link>
+          </li>
+          <li>
+            <.link navigate="/vagas" class={"btn btn-sm " <> if(@active_page == "vagas", do: "btn-active", else: "btn-ghost")}>
+              Vagas
+            </.link>
+          </li>
+          <li>
+            <.link navigate="/habilidades" class={"btn btn-sm " <> if(@active_page == "habilidades", do: "btn-active", else: "btn-ghost")}>
+              Habilidades
+            </.link>
+          </li>
+          <li>
+            <.link navigate="/configuracoes" class={"btn btn-sm " <> if(@active_page == "configuracoes", do: "btn-active", else: "btn-ghost")}>
+              Config
+            </.link>
+          </li>
+          <li>
+            <.link navigate="/ajuda" class={"btn btn-sm " <> if(@active_page == "ajuda", do: "btn-active", else: "btn-ghost")}>
+              Ajuda
+            </.link>
+          </li>
         </ul>
         <.theme_toggle />
       </div>

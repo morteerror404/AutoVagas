@@ -7,111 +7,172 @@ defmodule AutoVagasWeb.JobsLive do
     ~H"""
     <Layouts.app flash={@flash}>
       <div class="max-w-6xl mx-auto p-6">
-        <div class="flex justify-between items-center mb-6">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
           <div>
             <h1 class="text-3xl font-bold text-base-content">Vagas Capturadas</h1>
-            <p class="text-base-content/60">{length(@jobs)} vagas</p>
+            <p class="text-base-content/60"><%= length(@displayed_jobs) %> de <%= length(@jobs) %> vagas</p>
           </div>
           <div class="flex gap-2">
-            <button phx-click="clear_all" class="btn btn-error btn-sm">Limpar Tudo</button>
-            <.link navigate="/buscar" class="btn btn-primary">Nova Busca</.link>
+            <.link navigate="/buscar" class="btn btn-primary btn-sm">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              Nova Busca
+            </.link>
+            <button phx-click="clear_all" class="btn btn-error btn-sm">
+              Limpar Tudo
+            </button>
           </div>
         </div>
 
-        <.form for={@search_form} phx-change="search" class="mb-4">
-          <input
-            type="text"
-            name="q"
-            placeholder="Buscar por título, empresa..."
-            value={@search_query}
-            class="input input-bordered w-full"
-          />
+        <!-- Toolbar -->
+        <div class="bg-base-200 rounded-lg p-4 mb-6">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Search -->
+            <div class="form-control">
+              <.form for={@search_form} phx-change="search" class="w-full">
+                <div class="input-group">
+                  <input
+                    type="text"
+                    name="q"
+                    placeholder="Buscar por título, empresa..."
+                    value={@search_query}
+                    class="input input-bordered w-full"
+                  />
+                  <button class="btn btn-square btn-ghost">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  </button>
+                </div>
+              </.form>
+            </div>
+
+            <!-- Bulk Actions -->
+            <div class="flex gap-2">
+              <button phx-click="select_all" class="btn btn-sm btn-outline flex-1">
+                Selecionar Todas
+              </button>
+              <button phx-click="deselect_all" class="btn btn-sm btn-outline flex-1">
+                Desmarcar
+              </button>
+            </div>
+
+            <!-- Toggle Filters -->
+            <div class="flex justify-end">
+              <button phx-click="toggle_filters" class={"btn btn-sm " <> if(@show_filters, do: "btn-active", else: "btn-ghost")}>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                </svg>
+                Filtros
+              </button>
+            </div>
+          </div>
+
+          <!-- Filters Panel -->
+          <div :if={@show_filters} class="mt-4 pt-4 border-t border-base-300">
+            <.form for={@filter_form} phx-change="apply_filter" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="form-control">
+                <label class="label">
+                  <span class="label-text text-xs">Palavras para EXCLUIR</span>
+                </label>
+                <input
+                  type="text"
+                  name="exclude_words"
+                  placeholder="separadas por vírgula"
+                  class="input input-bordered input-sm w-full"
+                />
+              </div>
+              <div class="form-control">
+                <label class="label">
+                  <span class="label-text text-xs">Palavras para INCLUIR (obriga)</span>
+                </label>
+                <input
+                  type="text"
+                  name="include_words"
+                  placeholder="separadas por vírgula"
+                  class="input input-bordered input-sm w-full"
+                />
+              </div>
+              <div class="form-control">
+                <label class="label cursor-pointer justify-start gap-2">
+                  <input type="checkbox" name="remote_only" class="checkbox checkbox-sm" />
+                  <span class="label-text text-xs">Apenas Remoto</span>
+                </label>
+              </div>
+              <div class="form-control">
+                <input
+                  type="text"
+                  name="require_keywords"
+                  placeholder="exigir estas palavras"
+                  class="input input-bordered input-sm w-full"
+                />
+              </div>
+            </.form>
+          </div>
+        </div>
+
+        <!-- Delete Selected -->
+        <.form for={%{}} phx-change="delete_selected" class="mb-4">
+          <button
+            type="submit"
+            phx-click="delete_selected"
+            class={"btn btn-sm btn-error " <> if(MapSet.size(@selected_ids) == 0, do: "btn-disabled", else: "")}
+            disabled={MapSet.size(@selected_ids) == 0}
+          >
+            Excluir <%= MapSet.size(@selected_ids) %> Selecionadas
+          </button>
         </.form>
 
-        <div class="flex gap-2 mb-4">
-          <button phx-click="select_all" class="btn btn-sm">Selecionar Todas</button>
-          <button phx-click="deselect_all" class="btn btn-sm">Desmarcar Todas</button>
-          <button phx-click="delete_selected" class="btn btn-error btn-sm">
-            Excluir Selecionadas
-          </button>
-          <button phx-click="toggle_filters" class="btn btn-secondary btn-sm">
-            {if @show_filters, do: "Ocultar Filtros", else: "Filtros"}
-          </button>
+        <!-- Jobs List -->
+        <div :if={@displayed_jobs == []} class="text-center py-16">
+          <div class="text-6xl mb-4">📭</div>
+          <p class="text-base-content/50 text-lg">Nenhuma vaga capturada.</p>
+          <.link navigate="/buscar" class="btn btn-primary mt-4">Fazer Busca</.link>
         </div>
 
-        <div :if={@show_filters} class="bg-base-200 rounded-lg p-4 mb-4 space-y-4">
-          <h3 class="font-bold">Filtros Globais</h3>
-          <.form for={@filter_form} phx-change="apply_filter" class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm mb-1">Palavras para EXCLUIR</label>
-              <input
-                type="text"
-                name="exclude_words"
-                placeholder="separadas por vírgula"
-                class="input input-bordered w-full"
-              />
-            </div>
-            <div>
-              <label class="block text-sm mb-1">Palavras para INCLUIR (obriga)</label>
-              <input
-                type="text"
-                name="include_words"
-                placeholder="separadas por vírgula"
-                class="input input-bordered w-full"
-              />
-            </div>
-            <div>
-              <label class="block text-sm mb-1">Apenas Remoto</label>
-              <input type="checkbox" name="remote_only" class="checkbox" />
-            </div>
-            <div>
-              <label class="block text-sm mb-1">Exigir palavras</label>
-              <input
-                type="text"
-                name="require_keywords"
-                placeholder="todas devem conter"
-                class="input input-bordered w-full"
-              />
-            </div>
-          </.form>
-        </div>
-
-        <div class="space-y-2">
-          <div :for={job <- @displayed_jobs} class="card bg-base-200 shadow-sm">
+        <div :if={@displayed_jobs != []} class="space-y-3">
+          <div :for={job <- @displayed_jobs} class="card bg-base-200 shadow-sm hover:shadow-md transition-shadow">
             <div class="card-body p-4">
-              <div class="flex items-start gap-3">
+              <div class="flex items-start gap-4">
                 <input
                   type="checkbox"
                   checked={job.selected}
                   phx-click="toggle_select"
                   phx-value={job.external_id}
-                  class="checkbox"
+                  class="checkbox checkbox-sm mt-1"
                 />
+
                 <div class="flex-1">
-                  <div class="flex justify-between">
-                    <h3 class="font-bold text-base-content">{job.title}</h3>
-                    <span class="badge badge-sm">{job.source}</span>
+                  <div class="flex justify-between items-start">
+                    <div>
+                      <h3 class="card-title text-base-content"><%= job.title %></h3>
+                      <p class="text-sm text-base-content/70"><%= job.company %></p>
+                      <p class="text-xs text-base-content/50"><%= job.location %></p>
+                    </div>
+                    <div class="badge badge-primary badge-sm"><%= job.source %></div>
                   </div>
-                  <p class="text-sm text-base-content/70">{job.company}</p>
-                  <p class="text-xs text-base-content/50">{job.location}</p>
-                  <div class="flex gap-2 mt-2">
-                    <a href={job.url} target="_blank" class="btn btn-xs btn-primary">Ver Original</a>
-                    <button phx-click="toggle_details" phx-value={job.external_id} class="btn btn-xs">
-                      {if @expanded[job.external_id], do: "Ocultar", else: "Mostrar Detalhes"}
+
+                  <div class="flex gap-2 mt-3">
+                    <a href={job.url} target="_blank" class="btn btn-primary btn-xs">
+                      Ver Original
+                    </a>
+                    <button phx-click="toggle_details" phx-value={job.external_id} class="btn btn-ghost btn-xs">
+                      <%= if(Map.get(@expanded, job.external_id, false), do: "Ocultar", else: "Detalhes") %>
                     </button>
                   </div>
-                  <div :if={@expanded[job.external_id]} class="mt-3 p-3 bg-base-300 rounded text-sm">
-                    <p class="whitespace-pre-wrap">{job.description || "Descrição não disponível"}</p>
+
+                  <div
+                    :if={Map.get(@expanded, job.external_id, false)}
+                    class="mt-3 p-3 bg-base-300 rounded text-sm"
+                  >
+                    <p class="whitespace-pre-wrap"><%= job.description || "Descrição não disponível" %></p>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-
-        <div :if={@displayed_jobs == []} class="text-center py-8 text-base-content/50">
-          <p>Nenhuma vaga capturada.</p>
-          <.link navigate="/buscar" class="btn btn-primary mt-4">Fazer busca</.link>
         </div>
       </div>
     </Layouts.app>
@@ -139,6 +200,7 @@ defmodule AutoVagasWeb.JobsLive do
 
     {:ok,
      socket
+     |> assign(:active_page, "vagas")
      |> assign(jobs: jobs, displayed_jobs: jobs, search_query: "", selected_ids: MapSet.new())
      |> assign(search_form: search_form, filter_form: filter_form)
      |> assign(expanded: %{}, show_filters: false)}
@@ -186,7 +248,7 @@ defmodule AutoVagasWeb.JobsLive do
   end
 
   def handle_event("select_all", _, socket) do
-    ids = MapSet.new(Enum.map(socket.assigns.jobs, & &1["external_id"]))
+    ids = MapSet.new(Enum.map(socket.assigns.jobs, & &1[:external_id]))
     jobs = Enum.map(socket.assigns.jobs, fn job -> Map.put(job, :selected, true) end)
     {:noreply, socket |> assign(jobs: jobs, selected_ids: ids)}
   end

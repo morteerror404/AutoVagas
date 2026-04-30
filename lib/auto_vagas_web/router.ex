@@ -17,18 +17,16 @@ defmodule AutoVagasWeb.Router do
   scope "/", AutoVagasWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
-
     # OAuth callbacks
     get "/auth/linkedin/callback", AuthController, :linkedin_callback
     get "/auth/indeed/callback", AuthController, :indeed_callback
     get "/auth/gupy/callback", AuthController, :gupy_callback
 
     # LiveView routes
-    live "/home", HomeLive, :home
+    live "/", HomeLive, :home
     live "/buscar", JobSearchLive, :index
-    live "/vagas", JobsLive, :index
     live "/configuracoes", SettingsLive, :index
+    live "/perfil", UserProfileLive, :index
     live "/ajuda", HelpLive, :index
     live "/habilidades", SkillsLive, :index
   end
