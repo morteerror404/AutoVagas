@@ -24,11 +24,10 @@ defmodule AutoVagasWeb.Router do
 
     # LiveView routes
     live "/", HomeLive, :home
-    live "/buscar", JobSearchLive, :index
     live "/configuracoes", SettingsLive, :index
-    live "/perfil", UserProfileLive, :index
-    live "/ajuda", HelpLive, :index
     live "/habilidades", SkillsLive, :index
+    live "/ajuda", HelpLive, :index
+    live "/vagas", JobsLive, :index
   end
 
   # Other scopes may use custom stacks.

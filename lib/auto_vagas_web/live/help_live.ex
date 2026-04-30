@@ -43,8 +43,8 @@ defmodule AutoVagasWeb.HelpLive do
               <.link navigate="/configuracoes" class="btn btn-sm btn-block btn-ghost justify-start">
                 ← Configurações
               </.link>
-              <.link navigate="/buscar" class="btn btn-sm btn-block btn-primary justify-start">
-                Buscar Vagas
+              <.link navigate="/habilidades" class="btn btn-sm btn-block btn-primary justify-start">
+                Habilidades
               </.link>
             </div>
           </div>

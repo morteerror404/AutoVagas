@@ -1,4 +1,4 @@
-defmodule AutoVagas.Experience do
+defmodule AutoVagas.Profiles.Experience do
   @moduledoc """
   Módulo para calcular experiência profissional dinâmica.
   - Salva o ano inicial (initial_year_experience)

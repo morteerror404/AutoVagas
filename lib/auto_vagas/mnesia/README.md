@@ -10,18 +10,6 @@ Este diretório contém os módulos para gerenciamento do banco de dados Mnesia 
   - `wait_for_tables/0`: Aguarda tabelas estarem disponíveis (timeout 10s)
   - `handle_result/2`: Trata resultados de criação de tabelas
 
-- **search_manager.ex**: Gerencia múltiplas buscas simultâneas.
-  - `create_search/3`: Cria nova busca com ID único
-  - `list_searches/0`: Lista todas as buscas ativas
-  - `get_search/1`: Obtém busca por ID
-  - `update_search_status/2`: Atualiza status da busca
-  - `delete_search/1`: Remove busca e vagas associadas
-  - `add_job/2`: Adiciona vaga a uma busca
-  - `list_jobs/1`: Lista vagas de uma busca
-  - `update_job_status/2`: Atualiza status da vaga
-  - `generate_search_id/0`: Gera ID único (hash SHA-256)
-  - `generate_job_id/0`: Gera ID único para vaga
-
 ## Tabelas Mnesia
 
 | Tabela | Atributos | Tipo |
@@ -50,9 +38,19 @@ AutoVagas.Mnesia.Schema.wait_for_tables()
 - Timeout no `wait_for_tables`: Loga warning, tenta recriar tabelas
 - Erros de criação: Loga erro, continua execução
 
+## JobsStore ⭐ NOVO
+
+O módulo `AutoVagas.Crawler.JobsStore` (`lib/crawler/jobs_store.ex`) substitui o antigo `jobs_cache.ex`:
+- `save/1`: Salva lista de vagas usando `:mnesia.transaction`
+- `load/0`: Carrega todas as vagas da tabela `:jobs`
+- `clear/0`: Limpa todas as vagas da tabela `:jobs`
+
+Usado no JobsLive para persistência de vagas capturadas.
+
 ## Status
 
 - ✅ Estrutura base implementada
 - ✅ Criação de tabelas funcionando
 - ✅ Pattern match corrigido para records de 4 elementos
-- 🔄 Migração completa de JobsCache para Mnesia (pendente)
+- ✅ JobsStore implementado e integrado
+- ✅ Migração completa (JobsStore substituiu JSON)

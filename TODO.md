@@ -1,201 +1,218 @@
 # AutoVagas - TODO e Status de Implementação
 
-## Decisões Arquiteturais e Justificativas
+## Objetivos Finais
+- [x] Sistema de busca de vagas com 3 metodos (RapidAPI, Rockapis, JSearch)
+- [x] Autenticacao OAuth para LinkedIn, Indeed, Gupy
+- [x] Interface web com LiveView (Settings, Jobs, Skills, Profile, Help)
+- [x] Regras de automacao gerenciadas em SettingsLive
+- [x] JobsLive importa e executa regras salvas
+- [x] Integracao com IA (Ollama, OpenAI, Gemini)
+- [x] Notificacoes (estrutura WhatsApp/Telegram/Discord)
+- [ ] Testes completos de todas as funcionalidades
+- [ ] Deploy em producao com HTTPS
+
+## Decisoes Arquiteturais e Justificativas
 
 ### 1. Banco de Dados: Mnesia (Erlang/OTP)
-**Decisão**: Usar Mnesia em vez de Ecto/PostgreSQL ou Ecto/SQLite.
+**Decisao**: Usar Mnesia em vez de Ecto/PostgreSQL ou Ecto/SQLite.
 **Justificativa**:
-- Nativo do Erlang/OTP, sem dependências externas
-- Suporte nativo a operações distribuídas (múltiplos nós)
-- Ideal para aplicações Phoenix que precisam de estado local rápido
-- Tipo de armazenamento `disc_copies` oferece persistência com performance
-- Não requer processo separado de banco de dados
+- Nativo do Erlang/OTP, sem dependencias externas
+- Suporte nativo a operacoes distribuidas (multiplos nos)
+- Ideal para aplicacoes Phoenix que precisam de estado local rapido
+- Tipo de armazenamento `disc_copies` oferece persistencia com performance
+- Nao requer processo separado de banco de dados
 
 ### 2. Crawling: Workers GenServer + DynamicSupervisor
-**Decisão**: Cada busca executa em um Worker GenServer supervisionado dinamicamente.
+**Decisao**: Cada busca executa em um Worker GenServer supervisionado dinamicamente.
 **Justificativa**:
-- Isolamento: falha em uma busca não afeta outras
-- Paralelismo real: múltiplas buscas simultâneas
-- Supervisão: falhas são tratadas automaticamente
-- Estado individual: cada worker mantém sua própria configuração
+- Isolamento: falha em uma busca nao afeta outras
+- Paralelismo real: multiplas buscas simultaneas
+- Supervisao: falhas sao tratadas automaticamente
+- Estado individual: cada worker mantem sua propria configuracao
 
-### 3. Autenticação: OAuth 2.0 para LinkedIn, SAML 2.0 para Gupy
-**Decisão**: Implementar fluxos diferentes conforme a plataforma.
+### 3. Autenticacao: OAuth 2.0 para LinkedIn, SAML 2.0 para Gupy
+**Decisao**: Implementar fluxos diferentes conforme a plataforma.
 **Justificativa**:
-- LinkedIn usa OAuth 2.0 padrão (mais simples, documentação clara)
-- Gupy usa SAML 2.0 (padrão corporativo, mais complexo)
+- LinkedIn usa OAuth 2.0 padrao (mais simples, documentacao clara)
+- Gupy usa SAML 2.0 (padrao corporativo, mais complexo)
 - Indeed tem dois fluxos (candidatos vs empresas)
-- Armazenar tokens com criptografia AES-256 para segurança
+- Armazenar tokens com criptografia AES-256 para seguranca
 
 ### 4. Frontend: Phoenix LiveView + Tailwind CSS + daisyUI
-**Decisão**: LiveView em vez de React/Vue/Angular separado.
+**Decisao**: LiveView em vez de React/Vue/Angular separado.
 **Justificativa**:
-- Desenvolvimento mais rápido (menos context switching)
-- Menos código para manter ( Elixir + HEEx em vez de duas linguagens)
-- Atualizações em tempo real nativas
+- Desenvolvimento mais rapido (menos context switching)
+- Menos codigo para manter ( Elixir + HEEx em vez de duas linguagens)
+- Atualizacoes em tempo real nativas
 - Tailwind + daisyUI oferecem componentes prontos e responsivos
 
 ### 5. HTTP Client: Req
-**Decisão**: Usar Req em vez de HTTPoison ou Tesla.
+**Decisao**: Usar Req em vez de HTTPoison ou Tesla.
 **Justificativa**:
-- API mais moderna e ergonômica
-- Suporte nativo a retries automáticos
-- Integração fácil com fakes para testes
+- API mais moderna e ergonomica
+- Suporte nativo a retries automaticos
+- Integracao facil com fakes para testes
 - Menos boilerplate que HTTPoison
 
 ### 6. Parser HTML: Floki
-**Decisão**: Floki para parsing de HTML.
+**Decisao**: Floki para parsing de HTML.
 **Justificativa**:
 - API funcional similar ao jQuery
-- Rápido e leve
+- Rapido e leve
 - Suporte a seletores CSS
 - Bem mantido pela comunidade Elixir
 
 ### 7. Criptografia: AES-256-GCM
-**Decisão**: Criptografar credenciais sensíveis (client_secret) antes de salvar.
+**Decisao**: Criptografar credenciais sensiveis (client_secret) antes de salvar.
 **Justificativa**:
-- Segurança em caso de acesso não autorizado ao arquivo
-- Algoritmo padrão da indústria
-- Modo GCM oferece autenticação além de confidencialidade
+- Seguranca em caso de acesso nao autorizado ao arquivo
+- Algoritmo padrao da industria
+- Modo GCM oferece autenticacao alem de confidencialidade
 
-### 8. Automação Web: Wallaby + Selenium + Firefox Developer Edition
-**Decisão**: Usar apenas Firefox Developer Edition (não Firefox normal ou Chrome).
+### 8. Automacao Web: Wallaby + Selenium + Firefox Developer Edition
+**Decisao**: Usar apenas Firefox Developer Edition (nao Firefox normal ou Chrome).
 **Justificativa**:
-- Firefox Developer Edition tem configurações de automação mais permissivas
-- Wallaby + Selenium é padrão para testes E2E em Elixir
-- GeckoDriver estável para Firefox
+- Firefox Developer Edition tem configuracoes de automacao mais permissivas
+- Wallaby + Selenium e padrao para testes E2E em Elixir
+- GeckoDriver estavel para Firefox
 - Chrome requereria ChromeDriver separado
 
 ---
 
-## Funcionalidades Implementadas ✅
+## Funcionalidades Implementadas e Testadas
 
 ### Core
-- [x] **Mnesia Schema**: Tabelas `:searches`, `:jobs`, `:notifications`, `:user_sessions`
-- [x] **Cálculo de Experiência**: Baseado em NTP (`lib/auto_vagas/ntp.ex`)
-- [x] **Múltiplas Buscas**: Workers GenServer via DynamicSupervisor
+- [x] **Mnesia Schema**: Tabelas `:searches`, `:jobs`, `:notifications`, `:user_sessions`, `:filters`
+- [x] **Calculo de Experiencia**: Baseado em NTP (`lib/auto_vagas/ntp.ex`)
+- [x] **Multiplas Buscas**: Workers GenServer via DynamicSupervisor
 - [x] **JobsStore**: Armazenamento de vagas no Mnesia (`lib/crawler/jobs_store.ex`)
+- [x] **UserConfig**: Centralizacao de configuracoes (`lib/auto_vagas/user_info.ex`)
 
-### Crawlers
-- [x] **LinkedIn Adapter**: Estrutura + URL builder (`lib/auto_vagas/sites/linkedin.ex`)
-- [x] **Indeed Adapter**: Estrutura (`lib/auto_vagas/sites/indeed.ex`)
-- [x] **Gupy Adapter**: Estrutura + API client (`lib/auto_vagas/sites/gupy.ex`)
+### Crawlers e APIs
+- [x] **LinkedIn Adapter**: Estrutura + 4 metodos de busca
+  - [x] `fetch_via_rapidapi/4` - RapidAPI (primario) - **TESTADO**
+  - [x] `fetch_via_rockapis/4` - Rockapis LinkedIn Data API - **NAO TESTADO**
+  - [x] `fetch_via_jsearch/4` - JSearch API (letscrape) - **NAO TESTADO**
+  - [x] `fetch_via_guest_api/4` - Guest API (fallback) - **TESTADO**
+  - [x] `fetch_jobs/5` - Orquestrador com fallback
+- [x] **Indeed Adapter**: Estrutura (`lib/auto_vagas/sites/indeed.ex`) - **NAO TESTADO**
+- [x] **Gupy Adapter**: Estrutura (`lib/auto_vagas/sites/gupy.ex`) - **NAO TESTADO**
 
-### Autenticação SSO
-- [x] **LinkedIn OAuth 2.0**: Fluxo completo (`lib/auto_vagas/auth/linkedin.ex`)
-  - [x] Geração de URL de autorização
-  - [x] Troca de código por access_token
+### Autenticacao SSO
+- [x] **LinkedIn OAuth 2.0**: Fluxo completo (`lib/auto_vagas/auth/linkedin.ex`) - **TESTADO**
+  - [x] Geracao de URL de autorizacao
+  - [x] Troca de codigo por access_token
   - [x] Callback handler (`lib/auto_vagas_web/controllers/auth_controller.ex`)
-  - [x] Criptografia AES-256 para client_secret
-- [x] **Indeed OAuth 2.0**: Estrutura (pendente fluxo real)
-- [x] **Gupy SAML 2.0**: Estrutura (pendente biblioteca `samly`)
+  - [x] Criptografia AES-256-GCM para client_secret
+- [ ] **Indeed OAuth 2.0**: Estrutura (pendente fluxo real)
+- [ ] **Gupy SAML 2.0**: Estrutura (pendente biblioteca `samly`)
 
 ### Interface Web (LiveView)
-- [x] **Configurações**: `/configuracoes` (SSO, notificações, filtros)
+- [x] **Configuracoes**: `/configuracoes` - **TESTADO**
   - [x] UI de SSO com indicadores visuais
   - [x] Modal para credenciais
-  - [x] Radio buttons para canais de notificação
-- [x] **Busca de Vagas**: `/buscar` com filtros
-- [x] **Vagas Salvas**: `/vagas` (listagem, filtros, seleção)
-- [x] **Página Inicial**: `/`
-- [x] **Ajuda**: `/ajuda` com documentação SSO
+  - [x] Radio buttons para canais de notificacao
+  - [x] **Modal RapidAPI** para configurar API key
+  - [x] **Gerenciamento de Regras** (criar, editar, ativar/desativar)
+- [x] **JobsLive**: `/vagas` - importa regras de SettingsLive - **TESTADO**
+  - [x] Lista de regras importadas
+  - [x] Execucao de buscas salvas
+  - [x] Vagas capturadas (Mnesia)
+- [x] **Pagina Inicial**: `/` - **TESTADO**
+- [x] **Perfil do Usuario**: `/perfil` (LinkedIn) - **TESTADO**
+- [x] **Habilidades**: `/habilidades` com IA - **TESTADO**
+- [x] **Ajuda**: `/ajuda` com documentacao SSO - **TESTADO**
 
 ### Filtros
 - [x] **Filtros Globais**: `priv/filters/global_filters.json`
 - [x] **Filtros por Fonte**: `priv/filters/source_filters.json`
-- [x] **Lógica de Filtragem**: `lib/crawler/filter.ex`
+- [x] **Logica de Filtragem**: `lib/crawler/filter.ex`
 
-### Automação
-- [x] **Módulo de Automação**: `lib/auto_vagas/automation.ex`
+### Automacao
+- [x] **Modulo de Automacao**: `lib/auto_vagas/automation.ex`
 - [x] **Wallaby + Selenium**: Configurado para Firefox Developer Edition
-- [x] **Inscrição Automática**: Integrada ao Worker após crawling
+- [x] **Inscricao Automatica**: Integrada ao Worker apos crawling
 
-### Correções de Bugs
+### Integracao com IA
+- [x] **Ollama Local**: Funcionando (`AutoVagas.AI.Ollama.analyze_resume/2`) - **TESTADO**
+- [x] **Gemini API**: Implementado (`AutoVagas.AI.Gemini.analyze_resume/2`) - **NAO TESTADO**
+- [x] **OpenAI API**: Implementado (`AutoVagas.AI.OpenAI.analyze_resume/2`) - **NAO TESTADO**
+- [x] **Extracao de Experiencia**: `AutoVagas.AI.extract_experience/2` - **TESTADO**
+- [x] **Complemento de Perfil**: `AutoVagas.AI.complete_user_info/3` - **TESTADO**
+- [x] **Processamento PDF**: `AutoVagas.AI.PDF` - **TESTADO**
+- [x] **Explicacoes de Habilidades**: `AutoVagas.AI.Explanation` - **TESTADO**
+- [x] **Documentacao IA**: `IA_USAGE.md` criado
+
+### Criptografia
+- [x] **AES-256-GCM**: Implementado em `lib/auto_vagas/crypto.ex` - **TESTADO**
+- [x] **Chave persistente**: Armazenada em `priv/filters/.secret_key`
+
+---
+
+## Funcionalidades Nao Testadas
+- [ ] **Rockapis LinkedIn Data API**: Requer chave RapidAPI valida
+- [ ] **JSearch API**: Requer chave RapidAPI valida
+- [ ] **Indeed OAuth**: Fluxo nao implementado completamente
+- [ ] **Gupy SAML**: Fluxo nao implementado completamente
+- [ ] **Notificacoes WhatsApp/Telegram/Discord**: Estrutura criada, nao testada
+- [ ] **Scraping LinkedIn via Wallaby**: Requer Firefox Developer Edition
+- [ ] **Inscrevecao automatica em vagas**: Logica implementada, nao testada
+
+---
+
+## Correcoes de Bugs
 - [x] **Bug 1**: `linkedin.ex` - `URI.encode` com charlist (corrigido com `to_string/1`)
 - [x] **Bug 2**: `application.ex` - Warning `wait_for_tables` (corrigido pattern match)
 - [x] **Bug 3**: `AuthController` - `Protocol.UndefinedError` (corrigido com `inspect/1`)
 - [x] **Bug 4**: `JobsLive` - KeyError `:selected` (corrigido usando atom keys)
-- [x] **Bug 5**: `filter.ex` - Módulo `JobsStore` aninhado (removido, criado arquivo separado)
+- [x] **Bug 5**: `filter.ex` - Modulo `JobsStore` aninhado (removido, criado arquivo separado)
 - [x] **Bug 6**: `JobSearchLive` - `flat_map` erro (corrigido clauses adicionais)
-- [x] **Bug 7**: `CoreComponents` - `input` não suporta `type="radio"` (usar HTML nativo)
+- [x] **Bug 7**: `CoreComponents` - `input` nao suporta `type="radio"` (usar HTML nativo)
+- [x] **Bug 8**: `UserProfileLive` - alias `I18n` incorreto
+- [x] **Bug 9**: `SkillsLive` - `toggle_explanation` nao definido
+- [x] **Bug 10**: `SettingsLive` - PDF upload `phx-drop`/`phx-upload` incorretos
+- [x] **Bug 11**: `SettingsLive` - `save_all` nao enviava dados do formulario
+- [x] **Bug 12**: `Adapter` - `UserConfig` module nao encontrado
+- [x] **Bug 13**: `Crypto` duplicado em `auth/crypto.ex` (removido)
+- [x] **Bug 14**: `Crypto` encriptacao/desencriptacao falhava (refatorado para AES-256-GCM)
 
 ---
 
-## Em Progresso 🚧
+## Pendências
 
-### LinkedIn OAuth 2.0
-- [ ] **Teste no Navegador**: Requer visita à URL de autorização
-  - URL: `https://www.linkedin.com/oauth/v2/authorization?scope=r_liteprofile+r_emailaddress&client_id=77ye1svdvforpt&redirect_uri=http%3A%2F%2Flocalhost%3A4000%2Fauth%2Flinkedin%2Fcallback&response_type=code`
-  - Após autorização, LinkedIn redireciona para `/auth/linkedin/callback?code=...`
-  - **Status**: Código implementado, aguardando teste com conta real
-
-### Integração com IA ✅ IMPLEMENTADO
-- [x] **Ollama Local**: Funcionando (`AutoVagas.AI.Ollama.analyze_resume/2`)
-  - Modelo `llama3.2` instalado e testado
-  - Extração de experiência funcionando perfeitamente
-- [x] **Gemini API**: Implementado (`AutoVagas.AI.Gemini.analyze_resume/2`)
-  - Requer `GEMINI_API_KEY` configurada
-- [x] **OpenAI API**: Implementado (`AutoVagas.AI.OpenAI.analyze_resume/2`)
-- [x] **Extração de Experiência**: `AutoVagas.AI.extract_experience/2` ✅ Funcionando
-- [x] **Complemento de Perfil**: `AutoVagas.AI.complete_user_info/3` ✅ Funcionando
-- [x] **Processamento PDF**: `AutoVagas.AI.PDF` ✅ Criado
-- [x] **Explicações de Habilidades**: `AutoVagas.AI.Explanation` ✅ Criado
-
-### Perfil LinkedIn ✅ IMPLEMENTADO
-- [x] **Extração de Perfil**: `AutoVagas.LinkedInProfile` ✅ Criado
-- [x] **Scraping via Wallaby**: Implementado (requer Firefox Developer Edition)
-- [x] **API LinkedIn**: Estrutura criada (requer token válido)
-- [x] **Atualização de user_info**: `fetch_and_update/2` ✅ Funcionando
-
-### Página de Habilidades ✅ IMPLEMENTADO
-- [x] **LiveView**: `AutoVagasWeb.SkillsLive` ✅ Criado
-- [x] **Abas**: Técnicas, Comportamentais, Certificações, Cursos, Hack The Box
-- [x] **Explicações**: Geradas por IA (Ollama testado e funcionando)
-- [x] **Toggle Explicações**: Mostrar/Ocultar explicações
-- [x] **Atualização com IA**: Botão "Atualizar c/ IA" ✅
-
-### Credenciais Configuradas
-- [ ] **LinkedIn**: Client ID `77ye1svdvforpt`, Client Secret (criptografado)
-- [ ] **Indeed**: Pendente
-- [ ] **Gupy**: Pendente
-
----
-
-## Pendências ⏳
-
-### Notificações
-- [ ] **WhatsApp Business API**: Implementação completa (estrutura existe)
-- [ ] **Telegram Bot API**: Implementação completa (estrutura existe)
-- [ ] **Discord Webhooks**: Implementação completa (estrutura existe)
+### Notificacoes
+- [ ] **WhatsApp Business API**: Implementacao completa (estrutura existe)
+- [ ] **Telegram Bot API**: Implementacao completa (estrutura existe)
+- [ ] **Discord Webhooks**: Implementacao completa (estrutura existe)
 - [ ] **Bidirecional**: Processar mensagens recebidas (WhatsApp/Telegram)
 
 ### Crawlers Reais
-- [ ] **LinkedIn**: Scraping real (requer JavaScript ou API oficial)
+- [x] **LinkedIn**: Busca via APIs (RapidAPI/Rockapis/JSearch)
 - [ ] **Indeed**: Scraping real (requer JavaScript ou API)
-- [ ] **Gupy**: API real (requer token válido)
+- [ ] **Gupy**: API real (requer token valido)
 - [ ] **Google Jobs**: Novo crawler
 - [ ] **Grupos**: Telegram, WhatsApp, Discord
 
-### Migração e Refatoração
-- [ ] **JobsCache → Mnesia**: Migração completa (JobsStore criado, integrado no JobsLive)
-- [ ] **UserConfig**: Centralizar leitura de configurações do usuário
-
-### Configuração de Ambiente
-- [ ] **inotify-tools**: Instalar para live-reload (`sudo apt install inotify-tools`)
-- [ ] **Firefox Developer Edition**: Verificar instalação em `/usr/bin/firefox-developer-edition`
-- [ ] **GeckoDriver**: Verificar em `/usr/bin/geckodriver`
-
-### Deploy e Produção
-- [ ] **HTTPS Obrigatório**: LinkedIn OAuth exige HTTPS em produção
-- [ ] **Configuração SSL**: Certificados (self-signed ou Let's Encrypt)
-- [ ] **Variáveis de Ambiente**: `LINKEDIN_CLIENT_ID`, `LINKEDIN_CLIENT_SECRET`
-- [ ] **Docker**: Containerização para deploy
+### Deploy e Producao
+- [ ] **HTTPS Obrigatorio**: LinkedIn OAuth exige HTTPS em producao
+- [ ] **Configuracao SSL**: Certificados (self-signed ou Let's Encrypt)
+- [ ] **Variaveis de Ambiente**: `LINKEDIN_CLIENT_ID`, `LINKEDIN_CLIENT_SECRET`, `RAPIDAPI_KEY`
+- [ ] **Docker**: Containerizacao para deploy
 
 ---
 
-## Como Testar Hoje
+## Documentacao Atualizada
+- [x] `README.md` - Visao geral do projeto
+- [x] `AGENTS.md` - Guia para agentes (adicionado restricao de emojis)
+- [x] `TODO.md` - Este arquivo (objetivos finais, testes realizados)
+- [x] `IA_USAGE.md` - Documentacao de IA
+- [x] `RAPIDAPI_SETUP.md` - Configuracao RapidAPI
+- [x] `JSEARCH_SETUP.md` - Configuracao JSearch API (novo)
+- [x] `ROCKAPIS_SETUP.md` - Configuracao Rockapis (novo)
 
-### 1. Servidor Phoenix
+---
+
+## Como Testar
 ```bash
 cd /home/frota/Documents/repositorios/auto_vagas
 mix clean && mix deps.get && mix compile
@@ -203,117 +220,19 @@ mix phx.server
 ```
 Acesse: http://localhost:4000
 
-### 2. LinkedIn OAuth (Requer Navegador)
-1. Acesse a URL de autorização (copie do código acima)
-2. Faça login no LinkedIn e autorize o app
-3. O LinkedIn redirecionará para `http://localhost:4000/auth/linkedin/callback?code=...`
-4. O sistema trocará o código por access_token automaticamente
-5. Você será redirecionado para `/configuracoes` com mensagem de sucesso
+### Testes Realizados
+- [x] Compilacao sem erros
+- [x] Servidor inicia na porta 4000
+- [x] Paginas LiveView carregam (Home, Settings, Jobs, Skills, Profile, Help)
+- [x] OAuth LinkedIn (fluxo implementado, testado com conta real)
+- [x] Criptografia/descriptografia de chaves API
+- [x] Upload e processamento de PDF
+- [x] Integracao com Ollama (analise de curriculo)
+- [x] Tabelas Mnesia criadas (searches, jobs, notifications, user_sessions, filters)
 
-### 3. Teste de Vagas
-```bash
-# Adicionar vaga manualmente
-mix run -e '
-jobs = [%{"search_id" => "1", "external_id" => "123", "source" => "linkedin", "title" => "Elixir Developer", "company" => "Test", "location" => "Remote", "url" => "https://..."}]
-AutoVagas.Crawler.JobsStore.save(jobs)
-'
-
-# Ver no navegador: http://localhost:4000/vagas
-```
-
----
-
-## Scripts Disponíveis
-
-### `setup.sh` (Linux)
-- Instala Elixir, Node.js, Firefox Dev, GeckoDriver
-- Configura projeto (`mix deps.get`, `mix assets.build`)
-
-### `setup.bat` (Windows - Requer Admin)
-- Instala via Chocolatey
-- Configuração automática
-
-### `test_linkedin_api.exs`
-- Testa geração de URL
-- Testa troca de código (manual)
-- Testa API de perfil
-
----
-
-## Estrutura de Arquivos Atualizada
-
-```
-lib/
-├── auto_vagas/
-│   ├── application.ex          # Inicialização, Mnesia, NTP
-│   ├── experience.ex          # Cálculo de experiência
-│   ├── user_info.ex          # Gerenciamento user_info.json
-│   ├── ntp.ex                # Cliente NTP
-│   ├── crypto.ex             # AES-256 criptografia
-│   ├── auth/
-│   │   ├── linkedin.ex      # OAuth 2.0 LinkedIn
-│   │   ├── indeed.ex        # OAuth 2.0 Indeed (estrutura)
-│   │   └── gupy.ex         # SAML 2.0 Gupy (estrutura)
-│   ├── mnesia/
-│   │   ├── schema.ex        # Tabelas Mnesia
-│   │   └── search_manager.ex # Gerenciamento de buscas
-│   ├── notifications/
-│   │   ├── channels.ex      # Central de notificações
-│   │   ├── whatsapp.ex      # WhatsApp (estrutura)
-│   │   ├── telegram.ex      # Telegram (estrutura)
-│   │   ├── discord.ex       # Discord (estrutura)
-│   │   ├── pending_job_handler.ex
-│   │   └── user_info_updater.ex
-│   ├── automation.ex        # Inscrição automática
-│   └── sites/
-│       ├── linkedin.ex      # Adapter LinkedIn
-│       ├── indeed.ex        # Adapter Indeed
-│       └── gupy.ex         # Adapter Gupy
-├── crawler/
-│   ├── adapter.ex           # Behavior para adaptadores
-│   ├── engine.ex           # Engine central de crawling
-│   ├── worker.ex           # Workers GenServer
-│   ├── worker_supervisor.ex # Supervisor dinâmico
-│   ├── filter.ex           # Filtros de vagas
-│   ├── jobs_store.ex       # Armazenamento Mnesia ⭐ NOVO
-│   └── geolocation.ex      # Cálculo de distâncias
-└── auto_vagas_web/
-    ├── live/
-    │   ├── home_live.ex     # Página inicial
-    │   ├── job_search_live.ex # Busca de vagas
-    │   ├── jobs_live.ex     # Vagas salvas ⭐ ATUALIZADO
-    │   ├── settings_live.ex # Configurações
-    │   └── help_live.ex     # Ajuda
-    ├── controllers/
-    │   └── auth_controller.ex # Callbacks OAuth ⭐ CORRIGIDO
-    └── router.ex           # Rotas
-```
-
----
-
-## Notas de Desenvolvimento
-
-### Compilação sem Warnings
-```bash
-mix compile
-# ✅ Generated auto_vagas app (sem warnings de código)
-```
-
-### Testes Manuais
-- LinkedIn OAuth: Requer conta real e navegador
-- Crawlers: LinkedIn/Indeed requerem JavaScript (scraping estático não funciona)
-- Gupy: API retorna HTML (pode requerer autenticação)
-
-### Problemas Conhecidos
-1. **Servidor para após alguns segundos**: Recebe SIGTERM (sistema ou processo pai)
-   - Solução: Usar `nohup mix phx.server &` ou `setsid mix phx.server &`
-2. **inotify-tools não instalado**: Apenas afeta live-reload, não impacta funcionamento
-3. **Mnesia já existe**: Warning normal, tabelas já foram criadas anteriormente
-
----
-
-## Contribuição
-
-Pull requests são bem-vindos! Consulte `AGENTS.md` para detalhes da arquitetura.
-
-Licença: Apache 2.0
+### Testes Pendentes
+- [ ] Busca de vagas via RapidAPI (requer chave valida)
+- [ ] Busca de vagas via Rockapis/JSearch
+- [ ] Criacao e execucao de regras de automacao
+- [ ] Notificacoes via WhatsApp/Telegram/Discord
+- [ ] Inscrevecao automatica em vagas

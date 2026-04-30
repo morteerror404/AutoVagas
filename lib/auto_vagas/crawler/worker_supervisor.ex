@@ -15,6 +15,7 @@ defmodule AutoVagas.Crawler.WorkerSupervisor do
     DynamicSupervisor.init(strategy: :one_for_one)
   end
 
+  @spec start_search(any()) :: :ignore | {:error, any()} | {:ok, pid()} | {:ok, pid(), any()}
   @doc """
   Inicia um worker para uma busca específica.
   """

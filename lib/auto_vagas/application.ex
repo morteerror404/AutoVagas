@@ -9,7 +9,7 @@ defmodule AutoVagas.Application do
   def start(_type, _args) do
     # Inicializa Mnesia de forma segura (não falha se já existir)
     start_mnesia()
-    AutoVagas.Experience.initialize()
+          AutoVagas.Profiles.Experience.initialize()
 
     children = [
       AutoVagasWeb.Telemetry,

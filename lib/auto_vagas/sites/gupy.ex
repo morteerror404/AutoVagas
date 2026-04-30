@@ -25,7 +25,7 @@ defmodule AutoVagas.Crawler.Sites.Gupy do
   """
   @impl true
   def build_url(search_term, location \\ "Brazil", _time_posted \\ "r86400", _work_type \\ "all", _user_config \\ %{}) do
-    "#{@base_url}/jobs?searchTerm=#{URI.encode(search_term)}&county=#{URI.encode(location)}"
+    "#{@base_url}/jobs?searchTerm=#{URI.encode(search_term)}&country=#{URI.encode(location)}"
   end
 
   @doc """
@@ -46,21 +46,27 @@ defmodule AutoVagas.Crawler.Sites.Gupy do
   Parsing dos resultados de vagas da API da Gupy (JSON).
   """
   @impl true
-  def parse(html) when is_binary(html) do
-    case Jason.decode(html) do
-      {:ok, %{"jobs" => jobs}} ->
-        parse_jobs(jobs)
-
-      _ ->
-        []
+  def parse(body) when is_binary(body) do
+    case Jason.decode(body) do
+      {:ok, json} -> parse_jobs(json["jobs"] || [])
+      _ -> []
     end
   end
 
-  def parse(json) when is_map(json) do
-    parse_jobs(json["jobs"] || [])
+  @doc """
+  Busca vagas usando a API da Gupy.
+  """
+  def fetch_jobs(search_term, location, _time_posted, _work_type) do
+    url = build_url(search_term, location)
+    case Req.get(url, retry: :transient) do
+      {:ok, %{status: 200, body: body}} ->
+        {:ok, parse(body)}
+      {:error, reason} ->
+        {:error, reason}
+    end
   end
 
-  defp parse_jobs(jobs) do
+  defp parse_jobs(jobs) when is_list(jobs) do
     Enum.map(jobs, &parse_job/1)
   end
 
@@ -68,7 +74,7 @@ defmodule AutoVagas.Crawler.Sites.Gupy do
     %{
       title: job["name"] || "",
       company: job["companyName"] || "",
-      location: job["county"] || job["city"] || "",
+      location: job["country"] || job["city"] || "",
       url: job["portalUrl"] || "",
       external_id: to_string(job["id"]),
       source: "gupy"

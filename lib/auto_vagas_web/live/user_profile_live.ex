@@ -2,7 +2,7 @@ defmodule AutoVagasWeb.UserProfileLive do
   use AutoVagasWeb, :live_view
 
   alias AutoVagas.LinkedInProfile
-  alias AutoVagas.UserInfo, as: UserConfig
+  alias AutoVagas.Crawler.UserConfig
 
   def render(assigns) do
     ~H"""
@@ -226,7 +226,7 @@ defmodule AutoVagasWeb.UserProfileLive do
           <.link navigate="/configuracoes" class="btn btn-ghost btn-sm">
             ← Integrações
           </.link>
-          <.link navigate="/buscar" class="btn btn-primary btn-sm">
+          <.link navigate="/vagas" class="btn btn-primary btn-sm">
             Buscar Vagas
           </.link>
         </div>

@@ -124,20 +124,25 @@ assets/
 
 ### 1. **LiveView para Páginas Interativas**
 - `/buscar`: Formulário de busca com filtros em tempo real
-- `/vagas`: Listagem com seleção múltipla e exclusão
-- `/configuracoes`: Configurações SSO com modais
-- `/ajuda`: Página estática com documentação
+- `/vagas`: Automação de vagas - regras e buscas salvas ⭐ NOVO
+- `/configuracoes`: Configurações SSO, notificações, filtros, RapidAPI ⭐ ATUALIZADO
+- `/perfil`: Perfil do usuário (LinkedIn)
+- `/habilidades`: Habilidades com explicações de IA
+- `/ajuda`: Página com documentação SSO
 
 ### 2. **Controllers para Callbacks OAuth**
 ```elixir
 # router.ex
 get "/auth/linkedin/callback", AuthController, :linkedin_callback
 
-# auth_controller.ex
-def linkedin_callback(conn, %{"code" => code}) do
-  # Troca código por token
-  redirect(conn, to: "/configuracoes")
-end
+# Live routes
+live "/", HomeLive
+live "/buscar", JobSearchLive
+live "/vagas", JobsLive  # Automação ⭐
+live "/configuracoes", SettingsLive
+live "/perfil", UserProfileLive
+live "/habilidades", SkillsLive
+live "/ajuda", HelpLive
 ```
 
 ### 3. **PubSub para Notificações**

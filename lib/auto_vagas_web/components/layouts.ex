@@ -7,7 +7,8 @@ defmodule AutoVagasWeb.Layouts do
   embed_templates "layouts/*"
 
   attr :flash, :map, required: true
-  attr :current_scope, :map, default: nil
+  attr :active_page, :string, default: "home"
+
   slot :inner_block, required: true
 
   def app(assigns) do
@@ -24,11 +25,6 @@ defmodule AutoVagasWeb.Layouts do
           <li>
             <.link navigate="/" class={"btn btn-sm " <> if(@active_page == "home", do: "btn-active", else: "btn-ghost")}>
               Início
-            </.link>
-          </li>
-          <li>
-            <.link navigate="/buscar" class={"btn btn-sm " <> if(@active_page == "buscar", do: "btn-active", else: "btn-ghost")}>
-              Buscar
             </.link>
           </li>
           <li>

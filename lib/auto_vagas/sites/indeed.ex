@@ -69,6 +69,19 @@ defmodule AutoVagas.Crawler.Sites.Indeed do
     |> Enum.reject(&is_nil/1)
   end
 
+  @doc """
+  Busca vagas usando a lógica padrão (HTML scraping).
+  """
+  def fetch_jobs(search_term, location, _time_posted, _work_type) do
+    url = build_url(search_term, location)
+    case Req.get(url, retry: :transient) do
+      {:ok, %{status: 200, body: html}} ->
+        {:ok, parse(html)}
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
   defp parse_job_card(card) do
     with title_elem <- Floki.find(card, ".job-title"),
          title when title != [] <- Floki.text(title_elem),

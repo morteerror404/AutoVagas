@@ -1,4 +1,4 @@
-defmodule AutoVagas.AI do
+defmodule AutoVagas.AI.IA do
   @moduledoc """
   Módulo principal para integração com modelos de IA.
   Suporta múltiplos provedores: Ollama (local), Gemini, OpenAI, etc.
@@ -33,7 +33,7 @@ defmodule AutoVagas.AI do
   """
   def analyze_resume(resume_text, opts \\ []) do
     provider = opts[:provider] || get_provider()
-    
+
     case provider do
       :ollama -> AutoVagas.AI.Ollama.analyze_resume(resume_text, opts)
       :gemini -> AutoVagas.AI.Gemini.analyze_resume(resume_text, opts)
@@ -106,7 +106,7 @@ defmodule AutoVagas.AI do
     case Jason.decode(json_str) do
       {:ok, %{"experience" => exp}} -> {:ok, exp}
       {:ok, other} -> {:error, "Formato inválido: #{inspect(other)}"}
-      {:error, _} -> 
+      {:error, _} ->
         # Tenta extrair JSON se houver texto antes/depois
         case Regex.run(~r/\{.*\}/s, json_str) do
           [match] -> parse_experience_json(match)
@@ -117,10 +117,10 @@ defmodule AutoVagas.AI do
 
   defp parse_user_info_json(json_str, current_info) do
     case Jason.decode(json_str) do
-      {:ok, new_info} -> 
+      {:ok, new_info} ->
         merged = merge_user_info(current_info, new_info)
         {:ok, merged}
-      {:error, _} -> 
+      {:error, _} ->
         case Regex.run(~r/\{.*\}/s, json_str) do
           [match] -> parse_user_info_json(match, current_info)
           nil -> {:error, "Não foi possível parsear resposta da IA"}
@@ -131,7 +131,7 @@ defmodule AutoVagas.AI do
   defp merge_user_info(current, new) do
     current
     |> Map.merge(new)
-    |> Map.update(:experience, %{}, fn _exp -> 
+    |> Map.update(:experience, %{}, fn _exp ->
       Map.merge(Map.get(current, :experience, %{}), Map.get(new, "experience", %{}))
     end)
   end
@@ -157,7 +157,7 @@ defmodule AutoVagas.AI do
 
   defp get_in_config(map, keys) do
     keys
-    |> Enum.reduce(map, fn key, acc -> 
+    |> Enum.reduce(map, fn key, acc ->
       if is_map(acc), do: Map.get(acc, key), else: nil
     end)
   end

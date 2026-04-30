@@ -34,6 +34,21 @@ defmodule AutoVagas.Mnesia.Schema do
     create_jobs_table()
     create_notifications_table()
     create_user_sessions_table()
+    create_filters_table()
+  end
+
+  @doc """
+  Tabela de sessões de usuário autenticados.
+  """
+  def create_user_sessions_table do
+    opts = [
+      attributes: [:id, :user_id, :session_token, :expires_at, :created_at],
+      type: :set
+    ]
+
+    opts = add_storage_opt(opts)
+    :mnesia.create_table(:user_sessions, opts)
+    |> handle_result("user_sessions")
   end
 
   @doc """
@@ -82,18 +97,18 @@ defmodule AutoVagas.Mnesia.Schema do
   end
 
   @doc """
-  Tabela de sessões do usuário.
-  Armazena estado da sessão e configurações temporárias.
+  Tabela de filtros personalizados do usuário.
+  Armazena filtros criados via interface (ex: regras de automação).
   """
-  def create_user_sessions_table do
+  def create_filters_table do
     opts = [
-      attributes: [:session_id, :user_info, :current_searches, :preferences, :created_at, :expires_at],
+      attributes: [:id, :name, :keywords, :source, :location, :schedule, :active, :created_at, :updated_at],
       type: :set
     ]
 
     opts = add_storage_opt(opts)
-    :mnesia.create_table(:user_sessions, opts)
-    |> handle_result("user_sessions")
+    :mnesia.create_table(:filters, opts)
+    |> handle_result("filters")
   end
 
   @doc """

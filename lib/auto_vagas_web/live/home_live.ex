@@ -56,7 +56,7 @@ defmodule AutoVagasWeb.HomeLive do
               <h2 class="card-title text-base-content">Buscar Vagas</h2>
               <p class="text-base-content/60 text-sm">Encontre novas oportunidades com filtros avançados</p>
               <div class="card-actions justify-end mt-4">
-                <.link navigate="/buscar" class="btn btn-primary">Iniciar Busca</.link>
+                 <.link navigate="/vagas" class="btn btn-primary">Iniciar Busca</.link>
               </div>
             </div>
           </div>
@@ -81,7 +81,7 @@ defmodule AutoVagasWeb.HomeLive do
 
           <div :if={@recent_jobs == []} class="text-center py-8 text-base-content/50">
             <p>Nenhuma vaga capturada ainda.</p>
-            <.link navigate="/buscar" class="btn btn-primary btn-sm mt-4">Fazer Primeira Busca</.link>
+                 <.link navigate="/vagas" class="btn btn-primary btn-sm mt-4">Fazer Primeira Busca</.link>
           </div>
 
           <div :if={@recent_jobs != []} class="space-y-3">

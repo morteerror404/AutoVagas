@@ -5,19 +5,15 @@ defmodule AutoVagasWeb.SettingsLive do
 
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash}>
+    <Layouts.app flash={@flash} active_page={@active_page}>
       <div class="max-w-6xl mx-auto p-6">
         <div class="mb-6">
           <h1 class="text-3xl font-bold text-base-content"><%= I18n.t(@locale, "settings") %></h1>
-          <p class="text-base-content/60"><%= I18n.t(@locale, "profiles") %></p>
+          <p class="text-base-content/60">Configurações do sistema</p>
         </div>
 
         <!-- Tabs -->
         <div class="tabs tabs-boxed mb-6">
-          <a class={"tab " <> if(@active_tab == "profiles", do: "tab-active", else: "")}
-             phx-click="switch_tab" phx-value="profiles">
-            Perfis
-          </a>
           <a class={"tab " <> if(@active_tab == "integrations", do: "tab-active", else: "")}
              phx-click="switch_tab" phx-value="integrations">
             Integrações
@@ -26,108 +22,17 @@ defmodule AutoVagasWeb.SettingsLive do
              phx-click="switch_tab" phx-value="notifications">
             Notificações
           </a>
+          <a class={"tab " <> if(@active_tab == "rules", do: "tab-active", else: "")}
+             phx-click="switch_tab" phx-value="rules">
+            Regras
+          </a>
           <a class={"tab " <> if(@active_tab == "general", do: "tab-active", else: "")}
              phx-click="switch_tab" phx-value="general">
             Geral
           </a>
-        </div>
-
-        <!-- Profiles Tab -->
-        <div :if={@active_tab == "profiles"}>
-          <section class="bg-base-200 border border-base-300 rounded-lg p-6">
-            <div class="flex items-center justify-between mb-4">
-              <h2 class="text-xl font-semibold text-base-content">Perfis de Busca</h2>
-              <button phx-click="add_profile" class="btn btn-primary btn-sm">
-                Novo Perfil
-              </button>
-            </div>
-
-            <div class="space-y-4">
-              <div
-                :for={{id, profile} <- @streams.profiles}
-                id={id}
-                class="border border-base-300 rounded-lg p-4 bg-base-100"
-              >
-                <.form
-                  for={@profile_forms[id]}
-                  phx-submit="update_profile"
-                  phx-value-index={profile.index}
-                  class="space-y-4"
-                >
-                  <div class="flex gap-4 items-start">
-                    <div class="flex-1">
-                      <label class="block text-sm font-medium text-base-content mb-1">
-                        Nome do Perfil
-                      </label>
-                      <.input
-                        field={@profile_forms[id][:name]}
-                        type="text"
-                        placeholder="ex: Analista de Redes"
-                        class="w-full"
-                      />
-                    </div>
-                    <button
-                      type="button"
-                      phx-click="remove_profile"
-                      phx-value-index={profile.index}
-                      class="btn btn-error btn-sm mt-8"
-                    >
-                      ✕
-                    </button>
-                  </div>
-
-                  <div>
-                    <label class="block text-sm font-medium text-base-content mb-1">
-                      Palavras-chave
-                    </label>
-                    <.input
-                      field={@profile_forms[id][:keywords]}
-                      type="text"
-                      placeholder="palavras-chave..."
-                      class="w-full"
-                    />
-                  </div>
-
-                  <div class="grid grid-cols-2 gap-4">
-                    <div>
-                      <label class="block text-sm font-medium text-base-content mb-1">
-                        Tecnologias
-                      </label>
-                      <.input
-                        field={@profile_forms[id][:resources]}
-                        type="text"
-                        placeholder="ex: python, docker"
-                        class="w-full"
-                      />
-                    </div>
-                    <div>
-                      <label class="block text-sm font-medium text-base-content mb-1">
-                        Funções
-                      </label>
-                      <.input
-                        field={@profile_forms[id][:job_roles]}
-                        type="text"
-                        placeholder="ex: analista"
-                        class="w-full"
-                      />
-                    </div>
-                  </div>
-
-                  <div class="flex justify-end">
-                    <button type="submit" class="btn btn-primary btn-sm">
-                      Salvar Perfil
-                    </button>
-                  </div>
-                </.form>
-              </div>
-            </div>
-
-            <div :if={@profiles == []} class="text-center py-4 text-base-content/50">
-              <button phx-click="add_profile" class="btn btn-primary">
-                Criar Primeiro Perfil
-              </button>
-            </div>
-          </section>
+          <.link navigate="/perfil" class={"tab " <> if(@active_page == "perfil", do: "tab-active", else: "")}>
+            Perfil
+          </.link>
         </div>
 
         <!-- Integrations Tab -->
@@ -157,12 +62,7 @@ defmodule AutoVagasWeb.SettingsLive do
                       end
                     }></span>
                     <span class="text-sm">
-                      <%= case @auth_status["linkedin"] do
-                        :active -> "Ativo"
-                        :configured -> "Configurado"
-                        :error -> "Erro"
-                        _ -> "Inativo"
-                      end %>
+                      <%= auth_status_label(@auth_status["linkedin"]) %>
                     </span>
                   </div>
                 </div>
@@ -199,290 +99,102 @@ defmodule AutoVagasWeb.SettingsLive do
                   <span class="text-sm text-base-content/60">Em breve</span>
                 </div>
               </div>
+
+              <!-- RapidAPI - LinkedIn Job Search -->
+              <div class="border border-base-300 rounded-lg p-4 bg-base-100">
+                <div class="flex items-center justify-between mb-3">
+                  <div>
+                    <h3 class="font-medium text-base-content">RapidAPI - LinkedIn Jobs</h3>
+                    <p class="text-sm text-base-content/60">Busca de vagas via API</p>
+                  </div>
+                  <span class={
+                    "w-3 h-3 rounded-full " <>
+                      if(@rapidapi_configured, do: "bg-success", else: "border-2 border-base-300")
+                  }></span>
+                </div>
+                <div class="flex gap-2">
+                  <button phx-click="show_rapidapi_modal" class="btn btn-sm btn-outline btn-primary">
+                    Configurar
+                  </button>
+                  <.link href="https://rapidapi.com/fantastic-jobs-fantastic-jobs-default/api/linkedin-job-search-api" class="btn btn-sm btn-ghost" target="_blank">
+                    Documentação →
+                  </.link>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-4">
+              <.link navigate="/ajuda" class="btn btn-sm btn-ghost">
+                Ajuda com integrações →
+              </.link>
             </div>
           </section>
-
-          <!-- SSO Help -->
-          <div class="mt-4">
-            <.link navigate="/ajuda" class="btn btn-sm btn-ghost">
-              Ajuda com integrações →
-            </.link>
-          </div>
         </div>
 
-        <!-- Notifications Tab -->
-        <div :if={@active_tab == "notifications"}>
+        <!-- Rules Tab -->
+        <div :if={@active_tab == "rules"}>
           <section class="bg-base-200 border border-base-300 rounded-lg p-6">
-            <h2 class="text-xl font-semibold text-base-content mb-4">Canais de Notificação</h2>
-            <p class="text-sm text-base-content/60 mb-6">
-              Apenas um canal pode estar ativo por vez.
-            </p>
-
-            <div class="space-y-4">
-              <div class="border border-base-300 rounded-lg p-4 bg-base-100">
-                <div class="flex items-center justify-between">
-                  <div>
-                    <h3 class="font-medium text-base-content">WhatsApp</h3>
-                    <p class="text-sm text-base-content/60">WhatsApp Business</p>
-                  </div>
-                  <input
-                    type="radio"
-                    name="notification_channel"
-                    class="radio radio-primary"
-                    phx-click="toggle_channel"
-                    phx-value-channel="whatsapp"
-                    checked={@selected_channel == "whatsapp"}
-                  />
-                </div>
-                <div class="mt-2">
-                  <button phx-click="config_channel" phx-value-channel="whatsapp" class="btn btn-sm btn-outline btn-primary">
-                    Configurar
-                  </button>
-                </div>
-              </div>
-
-              <div class="border border-base-300 rounded-lg p-4 bg-base-100">
-                <div class="flex items-center justify-between">
-                  <div>
-                    <h3 class="font-medium text-base-content">Telegram</h3>
-                    <p class="text-sm text-base-content/60">Bot do Telegram</p>
-                  </div>
-                  <input
-                    type="radio"
-                    name="notification_channel"
-                    class="radio radio-primary"
-                    phx-click="toggle_channel"
-                    phx-value-channel="telegram"
-                    checked={@selected_channel == "telegram"}
-                  />
-                </div>
-                <div class="mt-2">
-                  <button phx-click="config_channel" phx-value-channel="telegram" class="btn btn-sm btn-outline btn-primary">
-                    Configurar
-                  </button>
-                </div>
-              </div>
-
-              <div class="border border-base-300 rounded-lg p-4 bg-base-100">
-                <div class="flex items-center justify-between">
-                  <div>
-                    <h3 class="font-medium text-base-content">Discord</h3>
-                    <p class="text-sm text-base-content/60">Webhook</p>
-                  </div>
-                  <input
-                    type="radio"
-                    name="notification_channel"
-                    class="radio radio-primary"
-                    phx-click="toggle_channel"
-                    phx-value-channel="discord"
-                    checked={@selected_channel == "discord"}
-                  />
-                </div>
-                <div class="mt-2">
-                  <button phx-click="config_channel" phx-value-channel="discord" class="btn btn-sm btn-outline btn-primary">
-                    Configurar
-                  </button>
-                </div>
-              </div>
-            </div>
-          </section>
-        </div>
-
-        <!-- General Tab -->
-        <div :if={@active_tab == "general"}>
-          <!-- Location -->
-          <section class="bg-base-200 border border-base-300 rounded-lg p-6 mb-4">
-            <h2 class="text-xl font-semibold text-base-content mb-4">Sua Localização</h2>
-            <div class="grid grid-cols-3 gap-4">
+            <div class="flex justify-between items-center mb-6">
               <div>
-                <label class="block text-sm font-medium text-base-content mb-1">País</label>
-                <input
-                  type="text"
-                  name="user_country"
-                  value={@user_location["country"]}
-                  placeholder="Brasil"
-                  class="input input-bordered w-full"
-                />
+                <h2 class="text-xl font-bold text-base-content">Regras de Automação</h2>
+                <p class="text-sm text-base-content/60">Gerencie regras para busca automática de vagas</p>
               </div>
-              <div>
-                <label class="block text-sm font-medium text-base-content mb-1">Estado</label>
-                <input
-                  type="text"
-                  name="user_state"
-                  value={@user_location["state"]}
-                  placeholder="SP"
-                  class="input input-bordered w-full"
-                />
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-base-content mb-1">Cidade</label>
-                <input
-                  type="text"
-                  name="user_city"
-                  value={@user_location["city"]}
-                  placeholder="São Paulo"
-                  class="input input-bordered w-full"
-                />
-              </div>
-            </div>
-          </section>
-
-          <!-- Languages and Filters -->
-          <section class="bg-base-200 border border-base-300 rounded-lg p-6 mb-4">
-            <h2 class="text-xl font-semibold text-base-content mb-4">Configurações Gerais</h2>
-
-            <.form for={@form} id="general-form" class="space-y-4">
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-sm font-medium text-base-content mb-1">Localização Padrão</label>
-                  <.input field={@form[:location]} type="text" placeholder="Brazil" class="w-full" />
-                </div>
-
-                <div>
-                  <label class="block text-sm font-medium text-base-content mb-1">Idiomas</label>
-                  <div class="flex flex-wrap gap-2 mb-2">
-                    <span :for={lang <- @selected_languages} class="badge badge-primary gap-1">
-                      <%= I18n.t(@locale, lang) %>
-                      <button phx-click="remove_language" phx-value={lang} class="btn btn-ghost btn-xs">✕</button>
-                    </span>
-                  </div>
-                  <select
-                    name="language"
-                    class="select select-bordered w-full"
-                    phx-change="add_language"
-                  >
-                    <option value="">Adicionar idioma</option>
-                    <option :for={{label, code} <- I18n.language_options(@locale)} value={code}>
-                      <%= label %>
-                    </option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-sm font-medium text-base-content mb-1">Tempo de Postagem</label>
-                  <.input
-                    field={@form[:time_posted]}
-                    type="select"
-                    options={I18n.time_options(@locale)}
-                    class="w-full"
-                  />
-                </div>
-
-                <div>
-                  <label class="block text-sm font-medium text-base-content mb-1">Tipo de Trabalho</label>
-                  <.input
-                    field={@form[:work_type]}
-                    type="select"
-                    options={I18n.work_options(@locale)}
-                    class="w-full"
-                  />
-                </div>
-              </div>
-            </.form>
-          </section>
-
-          <!-- Import Resume -->
-          <section class="bg-base-200 border border-base-300 rounded-lg p-6 mb-4">
-            <h2 class="text-xl font-semibold text-base-content mb-4">Importar Currículo</h2>
-
-            <div class="mb-4">
-              <button phx-click="toggle_help" class="btn btn-ghost btn-sm">
-                <%= if @show_help, do: "Fechar Ajuda", else: "Ajuda" %>
-              </button>
-            </div>
-
-            <div :if={@show_help} class="alert alert-info mb-4">
-              <div>
-                <strong>Como exportar:</strong>
-                <ol class="list-decimal list-inside text-sm mt-2">
-                  <li>LinkedIn → Mais → Salvar em PDF</li>
-                </ol>
-              </div>
-            </div>
-
-            <div
-              id="upload-dropzone"
-              phx-drop="set-upload"
-              class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-base-300 rounded-lg cursor-pointer hover:border-primary transition-colors"
-            >
-              <div class="flex flex-col items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 mb-2 text-base-content/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+              <button phx-click="new_rule" class="btn btn-primary btn-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
-                <p class="text-sm text-base-content/60">
-                  <%= if @uploading, do: "Processando...", else: "Clique ou arraste um PDF" %>
-                </p>
+                Nova Regra
+              </button>
+            </div>
+
+            <div class="space-y-3">
+              <div :if={@rules == []} class="text-center py-8 text-base-content/50">
+                <p class="text-sm">Nenhuma regra configurada</p>
+                <p class="text-xs mt-2">Clique em "Nova Regra" para começar</p>
+              </div>
+
+              <div :for={rule <- @rules} class="p-4 bg-base-100 rounded border border-base-300 hover:shadow-md transition-shadow">
+                <div class="flex justify-between items-start">
+                  <div class="flex-1">
+                    <div class="flex items-center gap-2 mb-2">
+                      <div class={"w-2 h-2 rounded-full " <> if(rule["active"], do: "bg-success", else: "bg-base-300")}></div>
+                      <h3 class="font-semibold text-base-content"><%= rule["name"] || "Sem nome" %></h3>
+                    </div>
+                    <p class="text-sm text-base-content/70 mb-2">
+                      <strong>Keywords:</strong> <%= Enum.join(rule["keywords"] || [], ", ") %>
+                    </p>
+                    <div class="flex gap-2">
+                      <span class="badge badge-sm"><%= rule["source"] || "linkedin" %></span>
+                      <span class={"badge badge-sm " <> if(rule["active"], do: "badge-success", else: "badge-ghost")}>
+                        <%= if rule["active"], do: "Ativa", else: "Inativa" %>
+                      </span>
+                      <span class="badge badge-sm"><%= rule["schedule"] || "diária" %></span>
+                    </div>
+                  </div>
+                  <div class="flex gap-1">
+                    <button phx-click="toggle_rule" phx-value={rule["id"]} class="btn btn-xs btn-ghost">
+                      <%= if rule["active"], do: "Desativar", else: "Ativar" %>
+                    </button>
+                    <button phx-click="delete_rule" phx-value={rule["id"]} class="btn btn-xs btn-error btn-ghost">
+                      Excluir
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <form id="upload-form" phx-submit="save_upload">
-              <input
-                type="file"
-                id="pdf-upload"
-                name="pdf"
-                accept=".pdf"
-                class="hidden"
-                phx-upload="set-upload"
-              />
-              <button :if={@uploads.pdf.entries != []} type="submit" class="btn btn-primary mt-4">
-                Processar Currículo
-              </button>
-            </form>
-
-            <div :if={@upload_message} class={"alert mt-4 " <> if(@upload_error, do: "alert-error", else: "alert-success")}>
-              <%= @upload_message %>
+            <div class="mt-6 bg-base-100 rounded-lg p-4 border border-base-300">
+              <h3 class="font-semibold text-base-content mb-2">Como usar</h3>
+              <ul class="text-sm text-base-content/70 space-y-1">
+                <li>1. Crie regras com palavras-chave e filtros desejados</li>
+                <li>2. Ative as regras que deseja executar automaticamente</li>
+                <li>3. Acesse a página "Vagas" para importar e executar as regras</li>
+                <li>4. O sistema buscará vagas automaticamente conforme o agendamento</li>
+              </ul>
             </div>
           </section>
-        </div>
-
-        <!-- Save Button -->
-        <div class="flex justify-end mt-6">
-          <button phx-click="save_all" class="btn btn-primary">
-            <%= I18n.t(@locale, "save_all") %>
-          </button>
         </div>
       </div>
-
-      <!-- Credentials Modal -->
-      <%= if @show_creds_modal do %>
-        <div class="modal modal-open">
-          <div class="modal-box">
-            <h3 class="font-bold text-lg mb-4">Credenciais - <%= String.capitalize(@creds_source) %></h3>
-
-            <div class="space-y-4">
-              <div>
-                <label class="block text-sm font-medium mb-1">Client ID</label>
-                <input
-                  type="text"
-                  class="input input-bordered w-full"
-                  value={@creds_client_id}
-                  phx-keyup="update_creds_field"
-                  phx-value-field="client_id"
-                />
-              </div>
-
-              <div>
-                <label class="block text-sm font-medium mb-1">Client Secret</label>
-                <input
-                  type="password"
-                  class="input input-bordered w-full"
-                  value={@creds_client_secret}
-                  phx-keyup="update_creds_field"
-                  phx-value-field="client_secret"
-                />
-                <p class="text-xs text-base-content/60 mt-1">Criptografado com AES-256</p>
-              </div>
-            </div>
-
-            <div class="modal-action">
-              <button phx-click="hide_creds_modal" class="btn btn-ghost">Cancelar</button>
-              <button phx-click="save_creds" class="btn btn-primary">Salvar</button>
-            </div>
-          </div>
-        </div>
-      <% end %>
     </Layouts.app>
     """
   end
@@ -531,10 +243,12 @@ defmodule AutoVagasWeb.SettingsLive do
 
     socket = assign(socket, :locale, detected_locale)
 
+    rapidapi_configured = load_rapidapi_key() != ""
+
     {:ok,
      socket
      |> assign(:active_page, "configuracoes")
-     |> assign(:active_tab, "profiles")
+     |> assign(:active_tab, "integrations")
      |> assign(form: form, work_form: work_form, language_input: language_input)
      |> assign(profiles: profiles, profile_forms: profile_forms)
      |> assign(selected_languages: selected_languages)
@@ -542,13 +256,14 @@ defmodule AutoVagasWeb.SettingsLive do
      |> assign(auth_status: auth_status, notification_status: notification_status, selected_channel: selected_channel)
      |> assign(show_help: false, uploading: false, upload_message: nil, upload_error: false)
      |> assign(show_creds_modal: false, creds_source: nil, creds_client_id: "", creds_client_secret: "")
+     |> assign(show_rapidapi_modal: false, rapidapi_key: load_rapidapi_key(), rapidapi_configured: rapidapi_configured)
      |> stream_configure(:profiles, dom_id: &"profile-#{&1.index}")
      |> stream(:profiles, profiles, reset: true)
      |> allow_upload(:pdf, accept: [".pdf"], max_entries: 1, max_file_size: 10_000_000)}
   end
 
   def handle_event("switch_tab", %{"tab" => tab}, socket) do
-    {:noreply, assign(socket, :active_tab, tab)}
+    {:noreply, assign(socket, active_tab: tab)}
   end
 
   def handle_event("toggle_help", _, socket),
@@ -591,36 +306,41 @@ defmodule AutoVagasWeb.SettingsLive do
      |> assign(auth_status: load_auth_status())}
   end
 
-  def handle_event("add_profile", _params, socket) do
-    new_profile = %{
-      index: length(socket.assigns.profiles),
-      name: "",
-      keywords: [],
-      resources: [],
-      job_roles: []
-    }
-
-    profiles = socket.assigns.profiles ++ [new_profile]
-    profile_forms = build_profile_forms(profiles)
-
-    {:noreply,
-     socket
-     |> assign(profiles: profiles, profile_forms: profile_forms)
-     |> stream(:profiles, profiles, reset: true)}
+  def handle_event("show_rapidapi_modal", _, socket) do
+    {:noreply, assign(socket, show_rapidapi_modal: true, rapidapi_key: load_rapidapi_key())}
   end
 
-  def handle_event("remove_profile", %{"index" => index}, socket) do
-    idx = String.to_integer(index)
-    profiles = List.delete_at(socket.assigns.profiles, idx)
-    profile_forms = build_profile_forms(profiles)
-
-    {:noreply,
-     socket
-     |> assign(profiles: profiles, profile_forms: profile_forms)
-     |> stream(:profiles, profiles, reset: true)}
+  def handle_event("hide_rapidapi_modal", _, socket) do
+    {:noreply, assign(socket, show_rapidapi_modal: false)}
   end
 
-  def handle_event("update_profile", _params, socket), do: {:noreply, socket}
+  def handle_event("update_rapidapi_field", %{"field" => field, "value" => value}, socket) do
+    socket =
+      case field do
+        "api_key" -> assign(socket, rapidapi_key: value)
+        _ -> socket
+      end
+    {:noreply, socket}
+  end
+
+  def handle_event("save_rapidapi", _, socket) do
+    api_key = socket.assigns.rapidapi_key || ""
+
+    if api_key != "" do
+      encrypted_key = AutoVagas.Crypto.encrypt(api_key)
+
+      auth_config = load_auth_config()
+      updated = put_in(auth_config, ["rapidapi", "linkedin_job_search", "api_key"], encrypted_key)
+      save_auth_config(updated)
+
+      {:noreply,
+       socket
+        |> assign(show_rapidapi_modal: false, rapidapi_configured: true)
+        |> put_flash(:info, "RapIDAPI configurado com sucesso!")}
+    else
+      {:noreply, put_flash(socket, :error, "Informe a API key")}
+    end
+  end
 
   def handle_event("add_language", %{"language" => lang}, socket) do
     if lang != "" and lang not in socket.assigns.selected_languages do
@@ -654,23 +374,82 @@ defmodule AutoVagasWeb.SettingsLive do
   def handle_event("save_upload", _params, socket) do
     entries = socket.assigns.uploads.pdf.entries
 
-    {entries_to_upload, socket} =
-      Enum.reduce(entries, {[], socket}, fn entry, {acc, socket} ->
-        [path] =
+    case entries do
+      [entry | _] ->
+        # Consume o arquivo enviado
+        {[path], socket} =
           consume_uploaded_entries(socket, :pdf, fn %{path: path}, _entry -> {:ok, path} end)
 
+        # Envia para processamento assíncrono
         Process.send(self(), {:process_upload, path, entry.client_name}, [])
 
-        {[{entry.ref, path} | acc], socket}
+        socket =
+          socket
+          |> cancel_upload(:pdf, [entry])
+          |> assign(uploading: true, upload_message: nil)
+
+        {:noreply, socket}
+
+      [] ->
+        {:noreply, put_flash(socket, :error, "Nenhum arquivo selecionado")}
+    end
+  end
+
+  # Rule Management Handlers
+  def handle_event("new_rule", _params, socket) do
+    rules = socket.assigns.rules
+
+    new_rule = %{
+      "id" => System.unique_integer([:positive]),
+      "name" => "Nova Regra",
+      "keywords" => [],
+      "source" => "linkedin",
+      "location" => "Brazil",
+      "schedule" => "daily",
+      "active" => true,
+      "created_at" => DateTime.utc_now() |> DateTime.to_iso8601()
+    }
+
+    updated_rules = rules ++ [new_rule]
+
+    # Salva no user_info
+    user_info = load_user_info()
+    updated = Map.put(user_info, "rules", updated_rules)
+    save_user_info(updated)
+
+    {:noreply, assign(socket, rules: updated_rules)}
+  end
+
+  def handle_event("toggle_rule", %{"value" => id}, socket) do
+    rules = socket.assigns.rules
+
+    updated_rules =
+      Enum.map(rules, fn rule ->
+        if Map.get(rule, "id") == id do
+          Map.put(rule, "active", not Map.get(rule, "active", false))
+        else
+          rule
+        end
       end)
 
-    socket =
-      socket
-      |> cancel_upload(:pdf, entries_to_upload)
-      |> assign(uploading: true, upload_message: nil)
+    user_info = load_user_info()
+    updated = Map.put(user_info, "rules", updated_rules)
+    save_user_info(updated)
 
-    {:noreply, socket}
+    {:noreply, assign(socket, rules: updated_rules)}
   end
+
+  def handle_event("delete_rule", %{"value" => id}, socket) do
+    rules = socket.assigns.rules
+    updated_rules = Enum.reject(rules, fn rule -> Map.get(rule, "id") == id end)
+
+    user_info = load_user_info()
+    updated = Map.put(user_info, "rules", updated_rules)
+    save_user_info(updated)
+
+    {:noreply, assign(socket, rules: updated_rules)}
+  end
+
 
   def handle_event(
         "save_all",
@@ -794,6 +573,17 @@ defmodule AutoVagasWeb.SettingsLive do
     _ -> %{}
   end
 
+  defp load_rules do
+    user_info = load_user_info()
+    Map.get(user_info, "rules", [])
+  end
+
+  defp save_rules(rules) do
+    user_info = load_user_info()
+    updated = Map.put(user_info, "rules", rules)
+    save_user_info(updated)
+  end
+
   defp load_auth_status do
     user_info = load_user_info()
     %{
@@ -848,4 +638,27 @@ defmodule AutoVagasWeb.SettingsLive do
       _ -> {:error, "Erro ao processar"}
     end
   end
+
+  defp auth_status_label(:active), do: "Ativo"
+  defp auth_status_label(:configured), do: "Configurado"
+  defp auth_status_label(:error), do: "Erro"
+  defp auth_status_label(_), do: "Inativo"
+
+  defp load_rapidapi_key do
+    try do
+      path = "priv/filters/auth_config.json"
+      case File.read(path) do
+        {:ok, content} ->
+          config = Jason.decode!(content)
+          case get_in(config, ["rapidapi", "linkedin_job_search", "api_key"]) do
+            nil -> nil
+            encrypted_key -> AutoVagas.Crypto.decrypt(encrypted_key)
+          end
+        _ -> nil
+      end
+    rescue
+      _ -> nil
+    end
+  end
+
 end
