@@ -8,6 +8,7 @@ defmodule AutoVagas.AI.Gemini do
 
   @base_url "https://generativelanguage.googleapis.com/v1beta/models"
 
+  
   @doc """
   Analisa currículo usando Gemini API.
   """
@@ -60,7 +61,7 @@ defmodule AutoVagas.AI.Gemini do
 
   defp build_prompt(resume_text, opts) do
     task = opts[:task] || "analyze_resume"
-    
+
     case task do
       "analyze_resume" ->
         """

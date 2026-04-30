@@ -90,7 +90,6 @@ lib/
 
 - `AGENTS.md` - Guia completo para agentes
 - `TODO.md` - Status e objetivos finais
-- `IA_USAGE.md` - Documentacao completa de IA
 - `RAPIDAPI_SETUP.md` - Configuracao RapidAPI
 - `JSEARCH_SETUP.md` - Configuracao JSearch API
 - `ROCKAPIS_SETUP.md` - Configuracao Rockapis

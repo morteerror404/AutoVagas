@@ -4,15 +4,12 @@ defmodule AutoVagas.AI.Explanation do
   Usa IA para interpretar desafios (como Hack The Box) e gerar contexto.
   """
 
-  alias AutoVagas.AI
-  alias AutoVagas.UserInfo
-
   @doc """
   Atualiza habilidades com explicações geradas por IA.
   """
   def update_skills_with_explanations(user_info) do
     skills = Map.get(user_info, "skills", %{})
-    
+
     updated = skills
               |> update_technical_with_ai()
               |> update_soft_with_ai()
@@ -26,7 +23,7 @@ defmodule AutoVagas.AI.Explanation do
 
   defp update_technical_with_ai(skills) do
     technical = Map.get(skills, "technical", [])
-    
+
     updated_technical = Enum.map(technical, fn skill ->
       if Map.get(skill, "explanation") do
         skill
@@ -41,7 +38,7 @@ defmodule AutoVagas.AI.Explanation do
 
   defp update_soft_with_ai(skills) do
     soft = Map.get(skills, "soft", [])
-    
+
     updated_soft = Enum.map(soft, fn skill ->
       if Map.get(skill, "explanation") do
         skill
@@ -56,7 +53,7 @@ defmodule AutoVagas.AI.Explanation do
 
   defp update_certifications_with_ai(skills) do
     certs = Map.get(skills, "certifications", [])
-    
+
     updated_certs = Enum.map(certs, fn cert ->
       if Map.get(cert, "explanation") do
         cert
@@ -71,7 +68,7 @@ defmodule AutoVagas.AI.Explanation do
 
   defp update_courses_with_ai(skills) do
     courses = Map.get(skills, "courses", [])
-    
+
     updated_courses = Enum.map(courses, fn course ->
       if Map.get(course, "explanation") do
         course
@@ -86,7 +83,7 @@ defmodule AutoVagas.AI.Explanation do
 
   defp update_hack_the_box_with_ai(skills) do
     htb = Map.get(skills, "hack_the_box", [])
-    
+
     updated_htb = Enum.map(htb, fn challenge ->
       if Map.get(challenge, "explanation") do
         challenge
@@ -102,11 +99,11 @@ defmodule AutoVagas.AI.Explanation do
   defp generate_technical_explanation(skill) do
     prompt = """
     Explique a habilidade técnica abaixo em 2-3 frases, destacando sua importância e aplicação prática.
-    
+
     Habilidade: #{skill["name"]}
     Nível: #{skill["level"] || "Intermediário"}
     Anos de experiência: #{skill["years"] || "N/A"}
-    
+
     Responda de forma concisa e profissional.
     """
 
@@ -119,10 +116,10 @@ defmodule AutoVagas.AI.Explanation do
   defp generate_soft_explanation(skill) do
     prompt = """
     Explique a habilidade comportamental abaixo em 2-3 frases, destacando sua importância no ambiente de trabalho.
-    
+
     Habilidade: #{skill["name"]}
     Nível: #{skill["level"] || "Intermediário"}
-    
+
     Responda de forma concisa e profissional.
     """
 
@@ -135,11 +132,11 @@ defmodule AutoVagas.AI.Explanation do
   defp generate_certification_explanation(cert) do
     prompt = """
     Explique a certificação abaixo em 2-3 frases, destacando sua relevância e o que ela valida.
-    
+
     Certificação: #{cert["name"]}
     Emissor: #{cert["issuer"] || "N/A"}
     Ano: #{cert["year"] || "N/A"}
-    
+
     Responda de forma concisa e profissional.
     """
 
@@ -152,11 +149,11 @@ defmodule AutoVagas.AI.Explanation do
   defp generate_course_explanation(course) do
     prompt = """
     Explique o curso abaixo em 2-3 frases, destacando o que foi aprendido e sua aplicação.
-    
+
     Curso: #{course["name"]}
     Plataforma: #{course["platform"] || "N/A"}
     Ano: #{course["year"] || "N/A"}
-    
+
     Responda de forma concisa e profissional.
     """
 
@@ -170,11 +167,11 @@ defmodule AutoVagas.AI.Explanation do
     prompt = """
     Analise o desafio do Hack The Box abaixo e explique o que ele demonstra sobre as competências do profissional.
     Considere o nível de dificuldade e o que foi necessário para completá-lo.
-    
+
     Desafio: #{challenge["name"]}
     Nível: #{challenge["level"] || "N/A"}
     Completado em: #{challenge["completed"] || "N/A"}
-    
+
     Responda em 2-3 frases, destacando as competências técnicas validadas por este desafio.
     """
 
