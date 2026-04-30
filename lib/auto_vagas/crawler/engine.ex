@@ -32,9 +32,9 @@ defmodule AutoVagas.Crawler.Engine do
     adapter = AutoVagas.Crawler.Adapter.adapter_for(source)
 
     case adapter do
-      AutoVagas.Crawler.Sites.LinkedIn ->
+      AutoVagas.Sites.LinkedIn ->
         # Usa nova implementação com múltiplas opções
-        case AutoVagas.Crawler.Sites.LinkedIn.fetch_jobs(search_term, location, time_posted, work_type) do
+        case AutoVagas.Sites.LinkedIn.fetch_jobs(search_term, location, time_posted, work_type) do
           {:ok, jobs} -> {:ok, jobs}
           {:error, reason} ->
             Logger.error("Erro em fetch_jobs: #{inspect(reason)}")

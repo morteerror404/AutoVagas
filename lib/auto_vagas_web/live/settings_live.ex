@@ -292,7 +292,7 @@ defmodule AutoVagasWeb.SettingsLive do
     client_id = socket.assigns.creds_client_id
     client_secret = socket.assigns.creds_client_secret
 
-    encrypted_secret = AutoVagas.Crypto.encrypt(client_secret)
+    encrypted_secret = AutoVagas.Auth.Crypto.encrypt(client_secret)
 
     auth_config = load_auth_config()
     updated = put_in(auth_config, [source, "client_id"], client_id)
@@ -327,7 +327,7 @@ defmodule AutoVagasWeb.SettingsLive do
     api_key = socket.assigns.rapidapi_key || ""
 
     if api_key != "" do
-      encrypted_key = AutoVagas.Crypto.encrypt(api_key)
+      encrypted_key = AutoVagas.Auth.Crypto.encrypt(api_key)
 
       auth_config = load_auth_config()
       updated = put_in(auth_config, ["rapidapi", "linkedin_job_search", "api_key"], encrypted_key)
@@ -652,7 +652,7 @@ defmodule AutoVagasWeb.SettingsLive do
           config = Jason.decode!(content)
           case get_in(config, ["rapidapi", "linkedin_job_search", "api_key"]) do
             nil -> nil
-            encrypted_key -> AutoVagas.Crypto.decrypt(encrypted_key)
+            encrypted_key -> AutoVagas.Auth.Crypto.decrypt(encrypted_key)
           end
         _ -> nil
       end

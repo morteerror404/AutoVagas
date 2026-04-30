@@ -1,4 +1,4 @@
-defmodule AutoVagas.AI.IA do
+defmodule AutoVagas.LLM.IA do
   @moduledoc """
   Módulo principal para integração com modelos de IA.
   Suporta múltiplos provedores: Ollama (local), Gemini, OpenAI, etc.
@@ -35,9 +35,9 @@ defmodule AutoVagas.AI.IA do
     provider = opts[:provider] || get_provider()
 
     case provider do
-      :ollama -> AutoVagas.AI.Ollama.analyze_resume(resume_text, opts)
-      :gemini -> AutoVagas.AI.Gemini.analyze_resume(resume_text, opts)
-      :openai -> AutoVagas.AI.OpenAI.analyze_resume(resume_text, opts)
+      :ollama -> AutoVagas.LLM.Ollama.analyze_resume(resume_text, opts)
+      :gemini -> AutoVagas.LLM.Gemini.analyze_resume(resume_text, opts)
+      :openai -> AutoVagas.LLM.OpenAI.analyze_resume(resume_text, opts)
       _ -> {:error, "Provedor de IA não suportado: #{provider}"}
     end
   end

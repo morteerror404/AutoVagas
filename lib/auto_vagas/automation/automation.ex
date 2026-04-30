@@ -1,4 +1,4 @@
-defmodule AutoVagas.Automation do
+defmodule AutoVagas.Automation.Automation do
   @moduledoc """
   Automação web usando Wallaby + Selenium + Firefox Developer Edition.
   """

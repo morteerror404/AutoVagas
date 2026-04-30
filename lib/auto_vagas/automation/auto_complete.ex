@@ -1,9 +1,7 @@
-defmodule AutoVagas.AutoComplete do
+defmodule AutoVagas.Automation.AutoComplete do
   @moduledoc """
   Sistema de auto-complete via LLM (Ollama) para coletar informações do usuário.
   """
-
-  alias __MODULE__.Ollama
 
   @user_info_path "priv/user_info.json"
 
@@ -69,7 +67,7 @@ defmodule AutoVagas.AutoComplete do
   """
   @spec detect_needed_field(String.t()) :: String.t() | nil
   def detect_needed_field(question) do
-    Ollama.classify_question(question)
+    AutoVagas.LLM.Ollama.classify_question(question)
   end
 
   defp field_name("job_roles"), do: "job_roles"

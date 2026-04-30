@@ -1,4 +1,4 @@
-defmodule AutoVagas.AI.Explanation do
+defmodule AutoVagas.LLM.Explanation do
   @moduledoc """
   Gera explicações para habilidades, certificações e cursos.
   Usa IA para interpretar desafios (como Hack The Box) e gerar contexto.
@@ -107,7 +107,7 @@ defmodule AutoVagas.AI.Explanation do
     Responda de forma concisa e profissional.
     """
 
-    case AI.analyze_resume(prompt, task: "explain_skill") do
+    case AutoVagas.LLM.IA.analyze_resume(prompt, task: "explain_skill") do
       {:ok, text} -> String.trim(text)
       {:error, _} -> "Explicação não disponível"
     end
@@ -123,7 +123,7 @@ defmodule AutoVagas.AI.Explanation do
     Responda de forma concisa e profissional.
     """
 
-    case AI.analyze_resume(prompt, task: "explain_skill") do
+    case AutoVagas.LLM.IA.analyze_resume(prompt, task: "explain_skill") do
       {:ok, text} -> String.trim(text)
       {:error, _} -> "Explicação não disponível"
     end
@@ -140,7 +140,7 @@ defmodule AutoVagas.AI.Explanation do
     Responda de forma concisa e profissional.
     """
 
-    case AI.analyze_resume(prompt, task: "explain_certification") do
+    case AutoVagas.LLM.IA.analyze_resume(prompt, task: "explain_certification") do
       {:ok, text} -> String.trim(text)
       {:error, _} -> "Explicação não disponível"
     end
@@ -157,7 +157,7 @@ defmodule AutoVagas.AI.Explanation do
     Responda de forma concisa e profissional.
     """
 
-    case AI.analyze_resume(prompt, task: "explain_course") do
+    case AutoVagas.LLM.IA.analyze_resume(prompt, task: "explain_course") do
       {:ok, text} -> String.trim(text)
       {:error, _} -> "Explicação não disponível"
     end
@@ -175,7 +175,7 @@ defmodule AutoVagas.AI.Explanation do
     Responda em 2-3 frases, destacando as competências técnicas validadas por este desafio.
     """
 
-    case AI.analyze_resume(prompt, task: "explain_htb") do
+    case AutoVagas.LLM.IA.analyze_resume(prompt, task: "explain_htb") do
       {:ok, text} -> String.trim(text)
       {:error, _} -> "Explicação não disponível"
     end
@@ -187,7 +187,7 @@ defmodule AutoVagas.AI.Explanation do
   def toggle_explanations(user_info, type, include) do
     path = ["skills", type, "include_explanations"]
     updated = put_in(user_info, path, include)
-    UserInfo.save(updated)
+    AutoVagas.Profile.UserInfo.save(updated)
     updated
   end
 

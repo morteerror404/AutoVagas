@@ -54,7 +54,7 @@ defmodule AutoVagas.LinkedInProfile do
   end
 
   defp extract_via_scraping(url, _opts) do
-    case AutoVagas.Automation.scrape_linkedin_profile(url) do
+    case AutoVagas.Automation.Automation.scrape_linkedin_profile(url) do
       {:ok, html} -> parse_profile_html(html)
       error -> error
     end

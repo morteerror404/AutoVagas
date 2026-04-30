@@ -341,8 +341,6 @@ defmodule AutoVagasWeb.I18n do
     end)
   end
 
-  defp parse_accept_language(_), do: "pt"
-
   @doc """
   Retorna a tradução para uma chave no idioma detectado.
   """

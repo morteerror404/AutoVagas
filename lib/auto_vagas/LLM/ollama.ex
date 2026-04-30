@@ -1,4 +1,4 @@
-defmodule AutoVagas.AI.Ollama do
+defmodule AutoVagas.LLM.Ollama do
   @moduledoc """
   Integração com Ollama (IA local).
   Requer Ollama rodando em http://localhost:11434.
@@ -22,8 +22,8 @@ defmodule AutoVagas.AI.Ollama do
 
     headers = [{"Content-Type", "application/json"}]
 
-    case Req.post("#{endpoint}/api/generate", 
-          json: payload, 
+    case Req.post("#{endpoint}/api/generate",
+          json: payload,
           headers: headers,
           retry: :transient) do
       {:ok, %Req.Response{status: 200, body: body}} ->
@@ -43,7 +43,7 @@ defmodule AutoVagas.AI.Ollama do
 
   defp build_prompt(resume_text, opts) do
     task = opts[:task] || "analyze_resume"
-    
+
     case task do
       "analyze_resume" ->
         """

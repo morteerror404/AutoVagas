@@ -1,4 +1,4 @@
-defmodule AutoVagas.AI.Gemini do
+defmodule AutoVagas.LLM.Gemini do
   @moduledoc """
   Integração com Google Gemini API.
   Requer GEMINI_API_KEY configurada no ai_config.json ou ENV.
@@ -8,7 +8,7 @@ defmodule AutoVagas.AI.Gemini do
 
   @base_url "https://generativelanguage.googleapis.com/v1beta/models"
 
-  
+
   @doc """
   Analisa currículo usando Gemini API.
   """

@@ -1,4 +1,4 @@
-defmodule AutoVagas.Crypto do
+defmodule AutoVagas.Auth.Crypto do
   @moduledoc """
   Modulo para criptografia AES de credenciais.
   Usa AES-256-GCM para criptografia autenticada.

@@ -1,4 +1,4 @@
-defmodule AutoVagas.AI.OpenAI do
+defmodule AutoVagas.LLM.OpenAI do
   @moduledoc """
   Integração com OpenAI API (GPT-4o, GPT-3.5, etc.).
   Requer OPENAI_API_KEY configurada no ai_config.json ou ENV.
@@ -19,7 +19,7 @@ defmodule AutoVagas.AI.OpenAI do
       {:error, "OPENAI_API_KEY not configured"}
     else
       url = "#{@base_url}/chat/completions"
-      
+
       payload = %{
         "model" => model,
         "messages" => [
@@ -61,7 +61,7 @@ defmodule AutoVagas.AI.OpenAI do
 
   defp build_prompt(resume_text, opts) do
     task = opts[:task] || "analyze_resume"
-    
+
     case task do
       "analyze_resume" ->
         """

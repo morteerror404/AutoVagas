@@ -119,7 +119,7 @@ defmodule AutoVagas.Auth.LinkedIn do
     if encrypted_secret && String.length(encrypted_secret) > 40 do
       # Assume it's encrypted (Base64 encoded ciphertext is longer)
       try do
-        AutoVagas.Crypto.decrypt(encrypted_secret)
+        AutoVagas.Auth.Crypto.decrypt(encrypted_secret)
       rescue
         _ -> encrypted_secret
       end

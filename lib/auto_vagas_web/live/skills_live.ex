@@ -3,7 +3,6 @@ defmodule AutoVagasWeb.SkillsLive do
 
   alias AutoVagas.LinkedInProfile
   alias AutoVagas.Crawler.UserConfig
-  alias AutoVagas.AI.Explanation
 
   @doc """
   Pagina de habilidades com criacao de perfil integrada.
@@ -11,19 +10,19 @@ defmodule AutoVagasWeb.SkillsLive do
   def mount(_params, _session, socket) do
     user_info = load_user_info()
     skills = Map.get(user_info, "skills", %{})
-    
+
     # Carrega dados do perfil LinkedIn
     linkedin_url = Map.get(user_info, "linkedin_profile_url", "")
     linkedin_data = Map.get(user_info, "linkedin_profile", %{})
-    
+
     # Formularios
     basic_form = to_form(%{
       "name" => Map.get(user_info, "name", ""),
       "location" => Map.get(user_info, "location", ""),
       "linkedin_url" => linkedin_url
     })
-    
-    {:ok, 
+
+    {:ok,
      socket
      |> assign(:active_page, "habilidades")
      |> assign(:user_info, user_info)
@@ -47,17 +46,17 @@ defmodule AutoVagasWeb.SkillsLive do
 
   def handle_event("update_skills", _params, socket) do
     user_info = socket.assigns.user_info
-    
-    case Explanation.update_skills_with_explanations(user_info) do
+
+    case AutoVagas.LLM.Explanation.update_skills_with_explanations(user_info) do
       {:ok, updated} ->
         save_user_info(updated)
-        {:noreply, 
+        {:noreply,
          socket
          |> put_flash(:info, "Habilidades atualizadas com sucesso!")
          |> assign(:user_info, updated)
          |> assign(:skills, Map.get(updated, "skills", %{}))}
-       
-      error ->
+
+          error ->
         {:noreply, put_flash(socket, :error, "Erro: #{inspect(error)}")}
     end
   end
@@ -70,34 +69,34 @@ defmodule AutoVagasWeb.SkillsLive do
 
   def handle_event("save_basic", %{"user_profile" => params}, socket) do
     user_info = UserConfig.load()
-    
+
     updated =
       user_info
       |> Map.put("name", params["name"])
       |> Map.put("location", params["location"])
       |> Map.put("linkedin_profile_url", params["linkedin_url"])
-    
+
     UserConfig.save(updated)
-    
+
     if params["linkedin_url"] != "" do
       LinkedInProfile.set_profile_url(updated, params["linkedin_url"])
     end
-    
+
     {:noreply, put_flash(socket, :info, "Perfil salvo!")}
   end
 
   def handle_event("sync_linkedin", _params, socket) do
     socket = assign(socket, syncing: true)
-    
+
     user_info = UserConfig.load()
-    
+
     case LinkedInProfile.fetch_and_update(user_info, use_scraping: true) do
       {:ok, updated} ->
         {:noreply,
          socket
          |> assign(syncing: false, linkedin_data: Map.get(updated, "linkedin_profile", %{}))
          |> put_flash(:info, "Perfil sincronizado com sucesso!")}
-       
+
       {:error, reason} ->
         {:noreply,
          socket
@@ -177,7 +176,7 @@ defmodule AutoVagasWeb.SkillsLive do
               <h3 class="font-bold mb-2"><%= Map.get(@linkedin_data, "name", "") %></h3>
               <p class="text-sm text-base-content/70"><%= Map.get(@linkedin_data, "headline", "") %></p>
               <p class="text-xs text-base-content/50 mt-1"><%= Map.get(@linkedin_data, "location", "") %></p>
-              
+
               <div :if={Map.get(@linkedin_data, "skills", []) != []} class="mt-4">
                 <h4 class="font-bold text-sm mb-2">Habilidades Extraídas:</h4>
                 <div class="flex flex-wrap gap-2">
@@ -199,23 +198,23 @@ defmodule AutoVagasWeb.SkillsLive do
         <div class="bg-base-200 rounded-lg p-6">
           <!-- Tabs -->
           <div class="tabs tabs-boxed mb-6">
-            <a class={"tab " <> if(@active_tab == "technical", do: "tab-active", else: "")} 
+            <a class={"tab " <> if(@active_tab == "technical", do: "tab-active", else: "")}
                phx-click="switch_tab" phx-value="technical">
               Técnicas
             </a>
-            <a class={"tab " <> if(@active_tab == "soft", do: "tab-active", else: "")} 
+            <a class={"tab " <> if(@active_tab == "soft", do: "tab-active", else: "")}
                phx-click="switch_tab" phx-value="soft">
               Comportamentais
             </a>
-            <a class={"tab " <> if(@active_tab == "certifications", do: "tab-active", else: "")} 
+            <a class={"tab " <> if(@active_tab == "certifications", do: "tab-active", else: "")}
                phx-click="switch_tab" phx-value="certifications">
               Certificações
             </a>
-            <a class={"tab " <> if(@active_tab == "courses", do: "tab-active", else: "")} 
+            <a class={"tab " <> if(@active_tab == "courses", do: "tab-active", else: "")}
                phx-click="switch_tab" phx-value="courses">
               Cursos
             </a>
-            <a class={"tab " <> if(@active_tab == "hack_the_box", do: "tab-active", else: "")} 
+            <a class={"tab " <> if(@active_tab == "hack_the_box", do: "tab-active", else: "")}
                phx-click="switch_tab" phx-value="hack_the_box">
               Hack The Box
             </a>
@@ -225,24 +224,24 @@ defmodule AutoVagasWeb.SkillsLive do
           <div :if={@active_tab == "technical"}>
             <.skills_section skills={Map.get(@skills, "technical", [])} expanded={assigns.expanded} />
           </div>
-          
+
           <div :if={@active_tab == "soft"}>
             <.skills_section skills={Map.get(@skills, "soft", [])} expanded={assigns.expanded} />
           </div>
-          
+
           <div :if={@active_tab == "certifications"}>
             <.skills_section skills={Map.get(@skills, "certifications", [])} expanded={assigns.expanded} />
           </div>
-          
+
           <div :if={@active_tab == "courses"}>
             <.skills_section skills={Map.get(@skills, "courses", [])} expanded={assigns.expanded} />
           </div>
-          
+
           <div :if={@active_tab == "hack_the_box"}>
             <.skills_section skills={Map.get(@skills, "hack_the_box", [])} expanded={assigns.expanded} />
           </div>
-          
-          <div :if={Map.get(@skills, "technical", []) == [] && Map.get(@skills, "soft", []) == []} 
+
+          <div :if={Map.get(@skills, "technical", []) == [] && Map.get(@skills, "soft", []) == []}
                class="text-center py-8 text-base-content/50">
             <p>Nenhuma habilidade cadastrada.</p>
             <button phx-click="update_skills" class="btn btn-primary btn-sm mt-4">Atualizar c/ IA</button>
@@ -270,7 +269,7 @@ defmodule AutoVagasWeb.SkillsLive do
             <p :if={skill["explanation"]} class="text-sm mt-2 text-base-content/60">
               {skill["explanation"]}
             </p>
-            <button phx-click="toggle_explanation" 
+            <button phx-click="toggle_explanation"
                     phx-value={skill["name"]}
                     class="btn btn-xs btn-ghost mt-2">
               {if Map.get(assigns[:expanded] || %{}, skill["name"], false), do: "Ocultar", else: "Ver Explicação"}
