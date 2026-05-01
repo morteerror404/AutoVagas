@@ -1,17 +1,17 @@
 defmodule AutoVagas.Auth.LinkedIn do
   @moduledoc """
-  LinkedIn OAuth 2.0 integration.
-  Flow: Authorization Code Grant with PKCE.
+  LinkedIn OAuth 2.0 OpenID Connect integration.
+  Flow: Authorization Code Grant with OpenID Connect.
   """
 
   require Logger
 
   @linkedin_auth_url "https://www.linkedin.com/oauth/v2/authorization"
   @linkedin_token_url "https://www.linkedin.com/oauth/v2/accessToken"
-  @linkedin_api_url "https://api.linkedin.com/v2"
+  @linkedin_userinfo_url "https://api.linkedin.com/v2/userinfo"
 
   @doc """
-  Returns the URL to redirect user for LinkedIn OAuth.
+  Returns the URL to redirect user for LinkedIn OAuth with OpenID Connect.
   """
   def authorize_url(state \\ "random_state") do
     client_id = get_client_id()
@@ -23,14 +23,14 @@ defmodule AutoVagas.Auth.LinkedIn do
         client_id: client_id,
         redirect_uri: redirect_uri,
         state: state,
-        scope: "r_liteprofile r_emailaddress"
+        scope: "openid profile email"
       })
 
     "#{@linkedin_auth_url}?#{query}"
   end
 
   @doc """
-  Exchanges authorization code for access token.
+  Exchanges authorization code for access token via OpenID Connect.
   """
   def exchange_code(code) do
     client_id = get_client_id()
@@ -53,7 +53,7 @@ defmodule AutoVagas.Auth.LinkedIn do
         token_data = Jason.decode!(body)
         access_token = token_data["access_token"]
         save_token(access_token)
-        {:ok, access_token}
+        {:ok, token_data}
 
       {:ok, %Req.Response{status: status, body: body}} ->
         Logger.error("LinkedIn token exchange failed: #{status} - #{inspect(body)}")
@@ -66,50 +66,28 @@ defmodule AutoVagas.Auth.LinkedIn do
   end
 
   @doc """
-  Fetches user profile from LinkedIn API.
+  Fetches user profile from LinkedIn UserInfo endpoint (OpenID Connect).
   """
-  def get_profile(token) do
+  def get_userinfo(token) do
     headers = [{"Authorization", "Bearer #{token}"}]
 
-    case Req.get("#{@linkedin_api_url}/me", headers: headers) do
+    case Req.get(@linkedin_userinfo_url, headers: headers) do
       {:ok, %Req.Response{status: 200, body: body}} ->
         {:ok, Jason.decode!(body)}
 
       {:ok, %Req.Response{status: status, body: body}} ->
-        Logger.error("LinkedIn profile fetch failed: #{status} - #{body}")
-        {:error, "Profile fetch failed"}
+        Logger.error("LinkedIn userinfo fetch failed: #{status} - #{inspect(body)}")
+        {:error, "Userinfo fetch failed"}
 
       {:error, reason} ->
-        Logger.error("LinkedIn profile error: #{inspect(reason)}")
-        {:error, reason}
-    end
-  end
-
-  @doc """
-  Fetches user email from LinkedIn API.
-  """
-  def get_email(token) do
-    headers = [{"Authorization", "Bearer #{token}"}]
-
-    case Req.get("#{@linkedin_api_url}/emailAddress?q=members&projection=(elements*(handle~))", headers: headers) do
-      {:ok, %Req.Response{status: 200, body: body}} ->
-        data = Jason.decode!(body)
-        email = get_in(data, ["elements", Access.at(0), "handle~", "emailAddress"])
-        {:ok, email}
-
-      {:ok, %Req.Response{status: status, body: body}} ->
-        Logger.error("LinkedIn email fetch failed: #{status} - #{body}")
-        {:error, "Email fetch failed"}
-
-      {:error, reason} ->
-        Logger.error("LinkedIn email error: #{inspect(reason)}")
+        Logger.error("LinkedIn userinfo error: #{inspect(reason)}")
         {:error, reason}
     end
   end
 
   defp get_client_id do
     config = load_auth_config()
-    get_in(config, ["linkedin", "client_id"]) || System.get_env("LINKEDIN_CLIENT_ID")
+    get_in(config, ["linkedin", "client_id"]) || System.get_env("LINKEDIN_CLIENT_ID") || "77k7gf05ngamtq"
   end
 
   defp get_client_secret do
@@ -117,7 +95,6 @@ defmodule AutoVagas.Auth.LinkedIn do
     encrypted_secret = get_in(config, ["linkedin", "client_secret"]) || System.get_env("LINKEDIN_CLIENT_SECRET")
 
     if encrypted_secret && String.length(encrypted_secret) > 40 do
-      # Assume it's encrypted (Base64 encoded ciphertext is longer)
       try do
         AutoVagas.Auth.Crypto.decrypt(encrypted_secret)
       rescue
@@ -129,7 +106,7 @@ defmodule AutoVagas.Auth.LinkedIn do
   end
 
   defp get_redirect_uri do
-    "http://localhost:4000/auth/linkedin/callback"
+    "https://localhost:4000/auth/linkedin/callback"
   end
 
   defp save_token(token) do

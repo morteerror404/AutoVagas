@@ -1,7 +1,7 @@
 defmodule AutoVagasWeb.UserProfileLive do
   use AutoVagasWeb, :live_view
 
-  alias AutoVagas.LinkedInProfile
+  alias AutoVagas.LinkedinProfile
   alias AutoVagas.Crawler.UserConfig
 
   def render(assigns) do
@@ -290,7 +290,7 @@ defmodule AutoVagasWeb.UserProfileLive do
     UserConfig.save(updated)
 
     if params["linkedin_url"] != "" do
-      LinkedInProfile.set_profile_url(updated, params["linkedin_url"])
+      AutoVagas.UserProfile.update_basic_info(updated, %{"linkedin_url" => params["linkedin_url"]})
     end
 
     {:noreply, put_flash(socket, :info, "Perfil salvo!")}
@@ -332,7 +332,7 @@ defmodule AutoVagasWeb.UserProfileLive do
 
     user_info = UserConfig.load()
 
-    case LinkedInProfile.fetch_and_update(user_info, use_scraping: true) do
+    case LinkedinProfile.fetch_and_update(user_info, use_scraping: true) do
       {:ok, updated} ->
         {:noreply,
          socket

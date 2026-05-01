@@ -66,8 +66,9 @@ defmodule AutoVagas.Automation.AutoComplete do
   Detecta o campo necessário para uma pergunta usando Ollama.
   """
   @spec detect_needed_field(String.t()) :: String.t() | nil
-  def detect_needed_field(question) do
-    AutoVagas.LLM.Ollama.classify_question(question)
+  def detect_needed_field(_question) do
+    # AutoVagas.LLM.Ollama.classify_question(question)
+    nil
   end
 
   defp field_name("job_roles"), do: "job_roles"

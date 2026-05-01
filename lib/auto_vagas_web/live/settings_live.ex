@@ -71,32 +71,10 @@ defmodule AutoVagasWeb.SettingsLive do
                     Credenciais
                   </button>
                   <%= if @auth_status["linkedin"] in [:inactive, :error] do %>
-                    <.link href={AutoVagas.Auth.LinkedIn.authorize_url()} class="btn btn-sm btn-primary">
+                    <button phx-click="open_oauth" phx-value-source="linkedin" class="btn btn-sm btn-primary">
                       Conectar
-                    </.link>
+                    </button>
                   <% end %>
-                </div>
-              </div>
-
-              <!-- Indeed -->
-              <div class="border border-base-300 rounded-lg p-4 bg-base-100">
-                <div class="flex items-center justify-between mb-3">
-                  <div>
-                    <h3 class="font-medium text-base-content">Indeed</h3>
-                    <p class="text-sm text-base-content/60">OAuth 2.0</p>
-                  </div>
-                  <span class="text-sm text-base-content/60">Em breve</span>
-                </div>
-              </div>
-
-              <!-- Gupy -->
-              <div class="border border-base-300 rounded-lg p-4 bg-base-100">
-                <div class="flex items-center justify-between mb-3">
-                  <div>
-                    <h3 class="font-medium text-base-content">Gupy</h3>
-                    <p class="text-sm text-base-content/60">SAML 2.0</p>
-                  </div>
-                  <span class="text-sm text-base-content/60">Em breve</span>
                 </div>
               </div>
 
@@ -119,6 +97,74 @@ defmodule AutoVagasWeb.SettingsLive do
                   <.link href="https://rapidapi.com/fantastic-jobs-fantastic-jobs-default/api/linkedin-job-search-api" class="btn btn-sm btn-ghost" target="_blank">
                     Documentação →
                   </.link>
+                </div>
+              </div>
+
+              <!-- Indeed -->
+              <div class="border border-base-300 rounded-lg p-4 bg-base-100">
+                <div class="flex items-center justify-between mb-3">
+                  <div>
+                    <h3 class="font-medium text-base-content">Indeed</h3>
+                    <p class="text-sm text-base-content/60">OAuth 2.0</p>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class={
+                      "w-3 h-3 rounded-full " <>
+                      case @auth_status["indeed"] do
+                        :active -> "bg-success"
+                        :configured -> "bg-success"
+                        :error -> "bg-error"
+                        _ -> "border-2 border-base-300"
+                      end
+                    }></span>
+                    <span class="text-sm">
+                      <%= auth_status_label(@auth_status["indeed"]) %>
+                    </span>
+                  </div>
+                </div>
+                <div class="flex gap-2">
+                  <button phx-click="show_creds_modal" phx-value-source="indeed" class="btn btn-sm btn-outline btn-primary">
+                    Credenciais
+                  </button>
+                  <%= if @auth_status["indeed"] in [:inactive, :error] do %>
+                    <button phx-click="open_oauth" phx-value-source="indeed" class="btn btn-sm btn-primary">
+                      Conectar
+                    </button>
+                  <% end %>
+                </div>
+              </div>
+
+              <!-- Gupy -->
+              <div class="border border-base-300 rounded-lg p-4 bg-base-100">
+                <div class="flex items-center justify-between mb-3">
+                  <div>
+                    <h3 class="font-medium text-base-content">Gupy</h3>
+                    <p class="text-sm text-base-content/60">SAML 2.0</p>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class={
+                      "w-3 h-3 rounded-full " <>
+                      case @auth_status["gupy"] do
+                        :active -> "bg-success"
+                        :configured -> "bg-success"
+                        :error -> "bg-error"
+                        _ -> "border-2 border-base-300"
+                      end
+                    }></span>
+                    <span class="text-sm">
+                      <%= auth_status_label(@auth_status["gupy"]) %>
+                    </span>
+                  </div>
+                </div>
+                <div class="flex gap-2">
+                  <button phx-click="show_creds_modal" phx-value-source="gupy" class="btn btn-sm btn-outline btn-primary">
+                    Credenciais
+                  </button>
+                  <%= if @auth_status["gupy"] in [:inactive, :error] do %>
+                    <button phx-click="open_oauth" phx-value-source="gupy" class="btn btn-sm btn-primary">
+                      Conectar
+                    </button>
+                  <% end %>
                 </div>
               </div>
             </div>
@@ -262,12 +308,20 @@ defmodule AutoVagasWeb.SettingsLive do
      |> allow_upload(:pdf, accept: [".pdf"], max_entries: 1, max_file_size: 10_000_000)}
   end
 
+  # All handle_event/3 clauses grouped together
   def handle_event("switch_tab", %{"tab" => tab}, socket) do
     {:noreply, assign(socket, active_tab: tab)}
   end
 
-  def handle_event("toggle_help", _, socket),
-    do: {:noreply, assign(socket, show_help: not socket.assigns.show_help)}
+  def handle_event("toggle_help", _, socket) do
+    {:noreply, assign(socket, show_help: not socket.assigns.show_help)}
+  end
+
+  def handle_event("open_oauth", %{"source" => source}, socket) do
+    url = oauth_url_for(source)
+    open_firefox_de(url)
+    {:noreply, put_flash(socket, :info, "Abrindo #{source} no Firefox Developer Edition...")}
+  end
 
   def handle_event("show_creds_modal", %{"source" => source}, socket) do
     {:noreply, assign(socket, show_creds_modal: true, creds_source: source, creds_client_id: "", creds_client_secret: "")}
@@ -336,7 +390,7 @@ defmodule AutoVagasWeb.SettingsLive do
       {:noreply,
        socket
         |> assign(show_rapidapi_modal: false, rapidapi_configured: true)
-        |> put_flash(:info, "RapIDAPI configurado com sucesso!")}
+        |> put_flash(:info, "RapidAPI configurado com sucesso!")}
     else
       {:noreply, put_flash(socket, :error, "Informe a API key")}
     end
@@ -450,12 +504,7 @@ defmodule AutoVagasWeb.SettingsLive do
     {:noreply, assign(socket, rules: updated_rules)}
   end
 
-
-  def handle_event(
-        "save_all",
-        %{"user_country" => country, "user_state" => state, "user_city" => city},
-        socket
-      ) do
+  def handle_event("save_all", %{"user_country" => country, "user_state" => state, "user_city" => city}, socket) do
     form = socket.assigns.form
     work_form = socket.assigns.work_form
 
@@ -543,28 +592,20 @@ defmodule AutoVagasWeb.SettingsLive do
     end
   end
 
-  defp build_profile_forms(profiles) do
-    Enum.reduce(profiles, %{}, fn profile, acc ->
-      form =
-        to_form(%{
-          "name" => Map.get(profile, "name", ""),
-          "keywords" => Map.get(profile, "keywords", []) |> Enum.join(", "),
-          "resources" => Map.get(profile, "resources", []) |> Enum.join(", "),
-          "job_roles" => Map.get(profile, "job_roles", []) |> Enum.join(", ")
-        }, as: "profile_#{profile.index}")
+  # All private functions grouped together
+  defp oauth_url_for("linkedin"), do: AutoVagas.Auth.LinkedIn.authorize_url()
+  defp oauth_url_for("indeed"), do: AutoVagas.Auth.Indeed.authorize_url()
+  defp oauth_url_for("gupy"), do: AutoVagas.Auth.Gupy.authorize_url()
+  defp oauth_url_for(_), do: ""
 
-      Map.put(acc, "profile-#{profile.index}", form)
-    end)
+  defp open_firefox_de(url) when url != "" do
+    try do
+      System.cmd("firefox-developer-edition", [url])
+    rescue
+      _ -> :ok
+    end
   end
-
-  defp parse_number(""), do: nil
-  defp parse_number(n) when is_binary(n), do: String.to_integer(n)
-  defp parse_number(n), do: n
-
-  defp parse_list(""), do: []
-  defp parse_list(s) when is_binary(s),
-    do: s |> String.split(",") |> Enum.map(&String.trim/1) |> Enum.reject(&(&1 == ""))
-  defp parse_list(l), do: l
+  defp open_firefox_de(_), do: :ok
 
   defp load_user_info do
     path = "priv/user_info.json"
@@ -573,23 +614,23 @@ defmodule AutoVagasWeb.SettingsLive do
     _ -> %{}
   end
 
-  defp load_rules do
-    user_info = load_user_info()
-    Map.get(user_info, "rules", [])
-  end
-
-  defp save_rules(rules) do
-    user_info = load_user_info()
-    updated = Map.put(user_info, "rules", rules)
-    save_user_info(updated)
-  end
-
   defp load_auth_status do
-    user_info = load_user_info()
+    config = load_auth_config()
     %{
-      "linkedin" => Map.get(user_info, "linkedin_auth", false),
-      "indeed" => Map.get(user_info, "indeed_auth", false),
-      "gupy" => Map.get(user_info, "gupy_auth", false)
+      "linkedin" =>
+        if(get_in(config, ["linkedin", "access_token"]) != nil or
+             (get_in(config, ["linkedin", "client_id"]) != nil and get_in(config, ["linkedin", "client_secret"]) != nil),
+           do: :configured,
+           else: :inactive),
+      "indeed" =>
+        if(get_in(config, ["indeed", "access_token"]) != nil or
+             (get_in(config, ["indeed", "client_id"]) != nil and get_in(config, ["indeed", "client_secret"]) != nil),
+           do: :configured,
+           else: :inactive),
+      "gupy" =>
+        if(get_in(config, ["gupy", "client_id"]) != nil and get_in(config, ["gupy", "client_secret"]) != nil,
+           do: :configured,
+           else: :inactive)
     }
   end
 
@@ -641,6 +682,7 @@ defmodule AutoVagasWeb.SettingsLive do
 
   defp auth_status_label(:active), do: "Ativo"
   defp auth_status_label(:configured), do: "Configurado"
+  defp auth_status_label(:inactive), do: "Inativo"
   defp auth_status_label(:error), do: "Erro"
   defp auth_status_label(_), do: "Inativo"
 
@@ -661,4 +703,27 @@ defmodule AutoVagasWeb.SettingsLive do
     end
   end
 
+  defp build_profile_forms(profiles) do
+    Enum.reduce(profiles, %{}, fn profile, acc ->
+      form =
+        to_form(%{
+          "name" => Map.get(profile, "name", ""),
+          "keywords" => Map.get(profile, "keywords", []) |> Enum.join(", "),
+          "resources" => Map.get(profile, "resources", []) |> Enum.join(", "),
+          "job_roles" => Map.get(profile, "job_roles", []) |> Enum.join(", ")
+        }, as: "profile_#{profile.index}")
+
+      Map.put(acc, "profile-#{profile.index}", form)
+    end)
+  end
+
+  defp parse_number(""), do: nil
+  defp parse_number(n) when is_binary(n), do: String.to_integer(n)
+  defp parse_number(n), do: n
+
+  defp parse_list(""), do: []
+  defp parse_list(s) when is_binary(s) do
+    s |> String.split(",") |> Enum.map(&String.trim/1) |> Enum.reject(&(&1 == ""))
+  end
+  defp parse_list(l), do: l
 end

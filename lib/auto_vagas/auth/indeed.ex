@@ -106,7 +106,8 @@ defmodule AutoVagas.Auth.Indeed do
   end
 
   defp get_redirect_uri do
-    "http://localhost:4000/auth/indeed/callback"
+    System.get_env("INDEED_REDIRECT_URI") ||
+      "https://localhost:4000/auth/auth/indeed/callback"
   end
 
   defp save_token(token) do

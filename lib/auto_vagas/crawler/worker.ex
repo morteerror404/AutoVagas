@@ -66,15 +66,15 @@ defmodule AutoVagas.Crawler.Worker do
     end
 
     # Inicia processo de inscrição automática
-    case AutoVagas.Automation.start_session() do
+    case AutoVagas.Automation.Automation.start_session() do
       {:ok, automation_session} ->
         Logger.info("Iniciando inscrições automáticas")
         Enum.each(jobs, fn job ->
           if job["source"] == "linkedin" do
-            AutoVagas.Automation.apply_to_job(automation_session, job["url"], user_info)
+            AutoVagas.Automation.Automation.apply_to_job(automation_session, job["url"], user_info)
           end
         end)
-        AutoVagas.Automation.end_session(automation_session)
+        AutoVagas.Automation.Automation.end_session(automation_session)
 
       {:error, reason} ->
         Logger.warning("Não foi possível iniciar sessão de automação: #{inspect(reason)}")
@@ -106,7 +106,7 @@ defmodule AutoVagas.Crawler.Worker do
       )
       fetch_jobs(adapter, urls)
     end)
-    |> Enum.uniq_by(& &1["external_id"])
+    |> Enum.uniq_by(fn job -> job["external_id"] end)
   end
 
   defp fetch_jobs(adapter, urls) do

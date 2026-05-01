@@ -22,12 +22,13 @@ defmodule AutoVagasWeb.Router do
     get "/auth/indeed/callback", AuthController, :indeed_callback
     get "/auth/gupy/callback", AuthController, :gupy_callback
 
-    # LiveView routes
-    live "/", HomeLive, :home
-    live "/configuracoes", SettingsLive, :index
-    live "/habilidades", SkillsLive, :index
-    live "/ajuda", HelpLive, :index
-    live "/vagas", JobsLive, :index
+# LiveView routes
+     live "/", HomeLive, :home
+     live "/configuracoes", SettingsLive, :index
+     live "/habilidades", SkillsLive, :index
+     live "/ajuda", HelpLive, :index
+     live "/vagas", JobsLive, :index
+     live "/rotinas", RotinasLive, :index
   end
 
   # Other scopes may use custom stacks.

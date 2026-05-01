@@ -5,13 +5,12 @@ defmodule AutoVagas.UserProfile do
   """
 
   alias AutoVagas.UserInfo, as: UserConfig
-  alias AutoVagas.LinkedInProfile
 
   @doc """
   Atualiza perfil com dados do LinkedIn.
   """
   def sync_linkedin_profile(user_info) do
-    case LinkedInProfile.fetch_and_update(user_info, use_scraping: true) do
+    case AutoVagas.LinkedinProfile.fetch_and_update(user_info, use_scraping: true) do
       {:ok, updated} ->
         # Extrai skills e experiências para o formato do AutoVagas
         merged = merge_linkedin_data(user_info, updated)
@@ -29,9 +28,9 @@ defmodule AutoVagas.UserProfile do
   def update_basic_info(user_info, attrs) do
     updated =
       user_info
-      |> Map.update("name", Map.get(attrs, "name", ""), & &1)
-      |> Map.update("location", Map.get(attrs, "location", ""), & &1)
-      |> Map.update("linkedin_profile_url", Map.get(attrs, "linkedin_url", ""), & &1)
+      |> Map.update("name", Map.get(attrs, "name", ""), fn _ -> Map.get(attrs, "name", "") end)
+      |> Map.update("location", Map.get(attrs, "location", ""), fn _ -> Map.get(attrs, "location", "") end)
+      |> Map.update("linkedin_profile_url", Map.get(attrs, "linkedin_url", ""), fn _ -> Map.get(attrs, "linkedin_url", "") end)
 
     UserConfig.save(updated)
     updated

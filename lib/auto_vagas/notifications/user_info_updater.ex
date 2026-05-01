@@ -70,13 +70,13 @@ defmodule AutoVagas.Notifications.UserInfoUpdater do
       |> Enum.join("\n")
 
     """
-    📋 *Resumo do AutoVagas*
+    [Resumo do AutoVagas]
 
-    📍 *Localização:* #{location}
+    *Localização:* #{location}
 
-    🎓 *Experiência:* #{exp_summary}
+    *Experiência:* #{exp_summary}
 
-    🔍 *Buscas Ativas:*
+    *Buscas Ativas:*
     #{searches_summary}
 
     Use comandos para atualizar:
@@ -105,7 +105,7 @@ defmodule AutoVagas.Notifications.UserInfoUpdater do
 
         UserConfig.save(updated)
 
-        {:ok, "✅ Experiência em #{technology} atualizada para #{years} anos"}
+        {:ok, "Experiência em #{technology} atualizada para #{years} anos"}
 
       {:error, reason} ->
         {:error, reason}
@@ -123,7 +123,7 @@ defmodule AutoVagas.Notifications.UserInfoUpdater do
 
         UserConfig.save(updated)
 
-        {:ok, "✅ Localização atualizada para #{location}"}
+        {:ok, "Localização atualizada para #{location}"}
 
       {:error, reason} ->
         {:error, reason}
@@ -135,7 +135,7 @@ defmodule AutoVagas.Notifications.UserInfoUpdater do
       {:ok, keywords, sources} ->
         {:ok, search_id} = AutoVagas.UserInfo.add_search(keywords, sources)
 
-        {:ok, "✅ Busca adicionada: #{keywords} em #{Enum.join(sources, ", ")} (ID: #{search_id})"}
+        {:ok, "Busca adicionada: #{keywords} em #{Enum.join(sources, ", ")} (ID: #{search_id})"}
     end
   end
 

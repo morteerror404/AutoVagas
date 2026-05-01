@@ -28,16 +28,16 @@ defmodule AutoVagas.Crawler.Engine do
   @doc """
   Executa busca de vagas usando a nova abordagem (API/Guest API/Scraping).
   """
-  def fetch_jobs(source, search_term, location \\ nil, time_posted \\ nil, work_type \\ nil) do
+  def fetch_jobs(source, search_term, _location \\ nil, _time_posted \\ nil, _work_type \\ nil) do
     adapter = AutoVagas.Crawler.Adapter.adapter_for(source)
 
     case adapter do
-      AutoVagas.Sites.LinkedIn ->
+      AutoVagas.Crawler.Sites.LinkedIn ->
         # Usa nova implementação com múltiplas opções
-        case AutoVagas.Sites.LinkedIn.fetch_jobs(search_term, location, time_posted, work_type) do
+        case AutoVagas.LinkedinProfile.fetch_and_update(search_term, use_scraping: true) do
           {:ok, jobs} -> {:ok, jobs}
           {:error, reason} ->
-            Logger.error("Erro em fetch_jobs: #{inspect(reason)}")
+            Logger.error("Erro em fetch_and_update: #{inspect(reason)}")
             :error
         end
 

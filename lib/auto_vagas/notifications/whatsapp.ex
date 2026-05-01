@@ -79,26 +79,26 @@ defmodule AutoVagas.Notifications.WhatsApp do
 
   defp build_pending_job_message(job) do
     """
-    🔔 *Vaga Pendente*
+    [Vaga Pendente]
 
-    *Título:* #{job.title}
-    *Empresa:* #{job.company}
-    *Local:* #{job.location}
-    *Fonte:* #{job.source}
+    Titulo: #{job.title}
+    Empresa: #{job.company}
+    Local: #{job.location}
+    Fonte: #{job.source}
 
-    Esta vaga não foi preenchida automaticamente. Por favor, envie as informações necessárias.
+    Esta vaga nao foi preenchida automaticamente. Por favor, envie as informacoes necessarias.
     """
   end
 
   defp build_new_job_message(job) do
     """
-    🆕 *Nova Vaga Encontrada*
+    [Nova Vaga Encontrada]
 
-    *Título:* #{job.title}
-    *Empresa:* #{job.company}
-    *Local:* #{job.location}
-    *Fonte:* #{job.source}
-    *URL:* #{job.url}
+    Titulo: #{job.title}
+    Empresa: #{job.company}
+    Local: #{job.location}
+    Fonte: #{job.source}
+    URL: #{job.url}
     """
   end
 

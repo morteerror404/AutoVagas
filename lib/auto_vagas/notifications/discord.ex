@@ -60,11 +60,11 @@ defmodule AutoVagas.Notifications.Discord do
 
   defp build_pending_job_embed(job) do
     %{
-      title: "🔔 Vaga Pendente",
-      description: "Esta vaga não foi preenchida automaticamente.",
+      title: "[Vaga Pendente]",
+      description: "Esta vaga nao foi preenchida automaticamente.",
       color: 16_711_680,
       fields: [
-        %{name: "Título", value: job.title, inline: true},
+        %{name: "Titulo", value: job.title, inline: true},
         %{name: "Empresa", value: job.company, inline: true},
         %{name: "Local", value: job.location, inline: true},
         %{name: "Fonte", value: job.source, inline: true}
@@ -75,11 +75,11 @@ defmodule AutoVagas.Notifications.Discord do
 
   defp build_new_job_embed(job) do
     %{
-      title: "🆕 Nova Vaga Encontrada",
+      title: "[Nova Vaga Encontrada]",
       description: "Uma nova vaga foi encontrada para sua busca!",
       color: 576_3719,
       fields: [
-        %{name: "Título", value: job.title, inline: true},
+        %{name: "Titulo", value: job.title, inline: true},
         %{name: "Empresa", value: job.company, inline: true},
         %{name: "Local", value: job.location, inline: true},
         %{name: "Fonte", value: job.source, inline: true},

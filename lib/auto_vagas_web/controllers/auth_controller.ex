@@ -2,14 +2,13 @@ defmodule AutoVagasWeb.AuthController do
   use AutoVagasWeb, :controller
 
   @doc """
-  Trata o callback do LinkedIn OAuth 2.0.
-  Troca o código de autorização por um Access Token.
+  Trata o callback do LinkedIn OAuth 2.0 via OpenID Connect.
   """
   def linkedin_callback(conn, %{"code" => code, "state" => _state}) do
-    case AutoVagas.Auth.LinkedIn.exchange_code(code) do
-      {:ok, _token} ->
+    case AutoVagasWeb.Auth.LinkedIn.Callback.handle(code) do
+      {:ok, _userinfo} ->
         conn
-        |> put_flash(:info, "LinkedIn conectado com sucesso!")
+        |> put_flash(:info, "LinkedIn conectado com sucesso via OpenID Connect!")
         |> redirect(to: "/configuracoes")
 
       {:error, reason} ->
@@ -29,8 +28,8 @@ defmodule AutoVagasWeb.AuthController do
   Trata o callback do Indeed OAuth 2.0.
   """
   def indeed_callback(conn, %{"code" => code, "state" => _state}) do
-    case AutoVagas.Auth.Indeed.exchange_code(code) do
-      {:ok, _token} ->
+    case AutoVagasWeb.Auth.Indeed.Callback.handle(code) do
+      {:ok, _profile} ->
         conn
         |> put_flash(:info, "Indeed conectado com sucesso!")
         |> redirect(to: "/configuracoes")
@@ -52,10 +51,15 @@ defmodule AutoVagasWeb.AuthController do
   Trata o callback do Gupy SAML 2.0.
   """
   def gupy_callback(conn, params) do
-    case AutoVagas.Auth.Gupy.process_saml_response(params) do
-      {:ok, _token} ->
+    case AutoVagasWeb.Auth.Gupy.Callback.handle(params) do
+      {:ok, _profile} ->
         conn
         |> put_flash(:info, "Gupy conectado com sucesso!")
+        |> redirect(to: "/configuracoes")
+
+      {:error, reason} ->
+        conn
+        |> put_flash(:error, "Erro ao conectar com Gupy: #{inspect(reason)}")
         |> redirect(to: "/configuracoes")
     end
   end

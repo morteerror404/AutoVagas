@@ -187,7 +187,7 @@ defmodule AutoVagas.LLM.Explanation do
   def toggle_explanations(user_info, type, include) do
     path = ["skills", type, "include_explanations"]
     updated = put_in(user_info, path, include)
-    AutoVagas.Profile.UserInfo.save(updated)
+    # AutoVagas.Profile.UserInfo.save(updated)
     updated
   end
 

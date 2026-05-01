@@ -1,0 +1,28 @@
+[
+  {
+    "id": 1,
+    "name": "Exemplo - Desenvolvedor Elixir",
+    "keywords": ["elixir", "phoenix", "erlang"],
+    "location": "Brazil",
+    "source": "linkedin",
+    "schedule": "daily",
+    "active": false,
+    "filters": {
+      "sort_by": "recent",
+      "time_posted": "r86400",
+      "experience_level": "mid_senior",
+      "work_type": "full_time",
+      "remote_type": "remote",
+      "linkedin_easy_apply": true,
+      "verified_only": false,
+      "less_than_10_applicants": true,
+      "in_network": false,
+      "second_chance": false,
+      "commitments": "work_life",
+      "sector": "",
+      "job_function": "",
+      "job_title": ""
+    },
+    "created_at": "2026-04-30T00:00:00Z"
+  }
+]
